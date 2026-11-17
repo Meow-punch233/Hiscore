@@ -1,0 +1,15 @@
+# Local Claude/Cursor settings (do not push)
+.claude/settings.local.json
+
+# Secrets and env
+.env
+.env.*
+*.pem
+*.key
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/

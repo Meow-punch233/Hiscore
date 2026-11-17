@@ -1,0 +1,22 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "grade-tracker-v12",
+      "url": "http://127.0.0.1:8899",
+      "port": 8899
+    },
+    {
+      "name": "grade-tracker-v12-local",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-I", "-m", "http.server", "8901", "--bind", "127.0.0.1"],
+      "port": 8900
+    },
+    {
+      "name": "campus-pixel-preview",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-I", "-m", "http.server", "8902", "--bind", "127.0.0.1"],
+      "port": 8902
+    }
+  ]
+}

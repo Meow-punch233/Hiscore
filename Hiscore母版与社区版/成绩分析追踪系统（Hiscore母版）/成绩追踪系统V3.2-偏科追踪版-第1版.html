@@ -1,0 +1,2855 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>成绩分析追踪 · 苏州 · 江苏新高考</title>
+<style>
+/* ============ 主题变量（浅色默认 / 深色两套入口） ============ */
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --surface-2: #f3f3ef;
+  --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
+  --accent: #2a78d6; --accent-soft: #cde2fb;
+  --good: #0ca30c; --good-text: #006300;
+  --warn: #fab219; --serious: #ec835a; --critical: #d03b3b;
+  --shadow: 0 1px 2px rgba(11,11,11,0.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232322;
+    --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+    --accent: #3987e5; --accent-soft: #184f95;
+    --good: #0ca30c; --good-text: #0ca30c;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232322;
+  --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+  --accent: #3987e5; --accent-soft: #184f95;
+  --good: #0ca30c; --good-text: #0ca30c;
+  --shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--page); color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 14px; line-height: 1.55;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px 64px; }
+
+/* ============ 头部与导航 ============ */
+header.app {
+  position: sticky; top: 0; z-index: 20;
+  background: var(--page); border-bottom: 1px solid var(--border);
+}
+.hd-in { max-width: 1080px; margin: 0 auto; padding: 12px 16px 0; }
+.hd-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.hd-top h1 { font-size: 17px; font-weight: 650; margin: 0; }
+.hd-sub { color: var(--muted); font-size: 12px; }
+.hd-actions { margin-left: auto; display: flex; gap: 8px; }
+nav.tabs { display: flex; gap: 4px; margin-top: 10px; overflow-x: auto; }
+nav.tabs button {
+  appearance: none; border: none; background: none; color: var(--ink-2);
+  font: inherit; font-size: 14px; padding: 8px 14px 10px; cursor: pointer;
+  border-bottom: 2px solid transparent; white-space: nowrap;
+}
+nav.tabs button.on { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+nav.tabs button:hover { color: var(--ink); }
+
+/* ============ 通用组件 ============ */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
+  margin-top: 16px;
+}
+.card h2 { font-size: 15px; font-weight: 650; margin: 0 0 2px; }
+.card .sub { color: var(--muted); font-size: 12px; margin: 0 0 12px; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 820px) { .grid2 { grid-template-columns: 1fr; } }
+button.btn {
+  appearance: none; font: inherit; font-size: 13px; cursor: pointer;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px;
+}
+button.btn:hover { background: var(--surface-2); }
+button.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.btn.danger { color: var(--critical); }
+button.chip {
+  appearance: none; font: inherit; font-size: 13px; cursor: pointer;
+  background: var(--surface); color: var(--ink-2);
+  border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px;
+}
+button.chip.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+button.chip:hover { color: var(--ink); }
+button.chip.on:hover { color: #fff; }
+input[type=text], input[type=number], select, textarea {
+  font: inherit; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px;
+}
+input:focus, select:focus, textarea:focus, button:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 1px;
+}
+label.fld { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--ink-2); }
+.hint { color: var(--muted); font-size: 12px; }
+.tag { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--ink-2); }
+.tag.good { color: var(--good-text); } .tag.crit { color: var(--critical); }
+.tag.warn { color: var(--ink-2); }
+
+/* ============ KPI / 状态瓷砖 ============ */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 16px; }
+.kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow); }
+.kpi .lb { font-size: 12px; color: var(--ink-2); }
+.kpi .vl { font-size: 26px; font-weight: 650; letter-spacing: -0.01em; margin-top: 2px; }
+.kpi .dt { font-size: 12px; margin-top: 2px; }
+.kpi .dt.up { color: var(--good-text); } .kpi .dt.down { color: var(--critical); } .kpi .dt.flat { color: var(--muted); }
+.hero .vl { font-size: 48px; line-height: 1.1; }
+
+/* 得分率 meter：同色系轨道 */
+.meter { height: 6px; border-radius: 3px; background: var(--accent-soft); overflow: hidden; margin-top: 6px; }
+.meter > i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+
+/* ============ 图表 ============ */
+.chart-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+.chart-head h3 { font-size: 14px; font-weight: 650; margin: 0; }
+.chart-head .cs { color: var(--muted); font-size: 12px; }
+.chart-head .tw { margin-left: auto; }
+svg.line, svg.bar { display: block; width: 100%; height: auto; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; }
+.legend .li { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-2); cursor: pointer; user-select: none; }
+.legend .li .key { width: 14px; height: 0; border-top: 2.5px solid; border-radius: 2px; }
+.legend .li.off { opacity: 0.38; }
+.legend .li:hover { color: var(--ink); }
+
+/* tooltip */
+#tt {
+  position: fixed; z-index: 50; pointer-events: none; display: none;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  padding: 8px 10px; font-size: 12px; min-width: 120px; max-width: 260px;
+}
+#tt .t { font-weight: 650; margin-bottom: 4px; }
+#tt .r { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+#tt .r .key { width: 12px; height: 0; border-top: 2.5px solid; border-radius: 2px; flex: none; }
+#tt .r .v { font-weight: 650; font-variant-numeric: tabular-nums; }
+#tt .r .n { color: var(--muted); }
+
+/* ============ 表格 ============ */
+table.tb { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+table.tb th, table.tb td { padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+table.tb th { color: var(--muted); font-weight: 500; font-size: 12px; position: sticky; top: 0; background: var(--surface); }
+table.tb th:first-child, table.tb td:first-child { text-align: left; }
+table.tb td.up { color: var(--good-text); } table.tb td.down { color: var(--critical); } table.tb td.flat { color: var(--muted); }
+.tscroll { overflow: auto; max-height: 420px; border: 1px solid var(--grid); border-radius: 8px; scrollbar-color: var(--axis) transparent; }
+.tscroll table.tb th { z-index: 1; }
+
+/* 名单 */
+ul.mv { list-style: none; margin: 0; padding: 0; }
+ul.mv li { display: flex; align-items: center; gap: 8px; padding: 7px 2px; border-bottom: 1px solid var(--grid); font-size: 13px; }
+ul.mv li:last-child { border-bottom: none; }
+ul.mv .nm { font-weight: 600; }
+ul.mv .meta { color: var(--muted); font-size: 12px; }
+ul.mv .val { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+/* 评估卡 */
+.subj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.subj-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: var(--surface); }
+.subj-card .hd { display: flex; align-items: center; gap: 8px; }
+.subj-card .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.subj-card .nm { font-weight: 650; }
+.subj-card .bd { margin-left: auto; }
+.subj-card .sc { font-size: 22px; font-weight: 650; margin-top: 6px; }
+.subj-card .sc small { font-size: 12px; color: var(--muted); font-weight: 400; }
+.subj-card dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 8px 0 0; font-size: 12px; }
+.subj-card dt { color: var(--muted); } .subj-card dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* 建议 */
+ul.advice { list-style: none; margin: 0; padding: 0; }
+ul.advice li { padding: 10px 2px; border-bottom: 1px solid var(--grid); }
+ul.advice li:last-child { border-bottom: none; }
+ul.advice .ah { display: flex; align-items: center; gap: 8px; font-weight: 650; font-size: 13px; }
+ul.advice .ah .dot { width: 9px; height: 9px; border-radius: 50%; }
+ul.advice .ah .pr { margin-left: auto; font-size: 12px; color: var(--muted); font-weight: 400; }
+ul.advice p { margin: 4px 0 0; color: var(--ink-2); font-size: 13px; }
+
+/* 录入 */
+textarea.paste { width: 100%; min-height: 140px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
+.entry-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+@media (max-width: 820px) { .entry-cols { grid-template-columns: 1fr; } }
+.msg { margin-top: 8px; font-size: 13px; }
+.msg.err { color: var(--critical); } .msg.ok { color: var(--good-text); }
+.banner { border: 1px solid var(--border); border-left: 3px solid var(--warn); background: var(--surface); border-radius: 8px; padding: 10px 14px; margin-top: 16px; font-size: 13px; color: var(--ink-2); }
+.banner.crit { border-left-color: var(--critical); }
+.banner ul { margin: 6px 0 0; padding-left: 20px; line-height: 1.8; }
+.set-tbl input { width: 72px; text-align: right; font-variant-numeric: tabular-nums; }
+.cfg-warn { border: 1px solid var(--border); border-left: 3px solid var(--critical); border-radius: 8px; padding: 8px 12px; margin-top: 12px; font-size: 12px; color: var(--ink-2); }
+.cfg-warn ul { margin: 4px 0 0; padding-left: 20px; line-height: 1.7; }
+
+footer.app { margin-top: 40px; color: var(--muted); font-size: 12px; text-align: center; }
+.empty { color: var(--muted); text-align: center; padding: 28px 0; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="tt" role="status" aria-live="polite"></div>
+
+<header class="app">
+  <div class="hd-in">
+    <div class="hd-top">
+      <h1>成绩分析追踪</h1>
+      <span class="hd-sub">苏州 · 江苏新高考 3+1+2（物理 + 化学 + 地理）· 总分 750</span>
+      <div class="hd-actions">
+        <button class="btn" id="themeBtn" title="切换深浅色">🌓 主题</button>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button data-tab="overview" class="on">总览</button>
+      <button data-tab="student">学生追踪</button>
+      <button data-tab="entry">成绩录入</button>
+      <button data-tab="settings">设置</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="main"></main>
+<footer class="app">数据只保存在这台电脑的浏览器里（localStorage）。换电脑或清缓存前，请先在「成绩录入」里导出备份。</footer>
+
+<script>
+"use strict";
+/* ================================================================
+   核心纯逻辑（无 DOM，可独立测试）
+   ================================================================ */
+/*__CORE_START__*/
+
+const SUBJECTS = [
+  { key: 'chinese',  name: '语文', max: 150, assigned: false, ci: 0 },
+  { key: 'math',     name: '数学', max: 150, assigned: false, ci: 1 },
+  { key: 'english',  name: '英语', max: 150, assigned: false, ci: 2 },
+  { key: 'physics',  name: '物理', max: 100, assigned: false, ci: 3 },
+  { key: 'chem',     name: '化学', max: 100, assigned: true,  ci: 4 },
+  { key: 'geo',      name: '地理', max: 100, assigned: true,  ci: 5 },
+];
+const CORE4 = ['chinese', 'math', 'english', 'physics'];
+
+const DEFAULT_BANDS = [
+  { name: 'A', pct: 15, min: 86, max: 100 },
+  { name: 'B', pct: 35, min: 71, max: 85 },
+  { name: 'C', pct: 35, min: 56, max: 70 },
+  { name: 'D', pct: 13, min: 41, max: 55 },
+  { name: 'E', pct: 2,  min: 30, max: 40 },
+];
+
+/* 偏科 / 不匹配默认阈值（定档：自身失衡；佐证：名单落后） */
+const DEFAULT_MISMATCH = {
+  selfGap: 0.15,      // 关注：某科得分率比自身六科平均低 15 个百分点（约前 25% 偏科幅度）
+  severeGap: 0.22,    // 预警：自身失衡达到 22 个百分点（约前 10%）
+  vsAvgGap: 0.10,     // 佐证：同时比该科名单均分低 10 个百分点
+  rankTail: 0.30,     // 佐证：同时单科排名落入名单后 30%
+  minRanked: 5,       // 名单不足该人数时，排名口径不参与（波动太大）
+};
+
+function defaultSettings() {
+  return { bands: DEFAULT_BANDS.map(b => ({ ...b })), line1: 512, line2: 448, mismatch: { ...DEFAULT_MISMATCH } };
+}
+
+/* --- 确定性随机（示例数据用） --- */
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function gauss(rnd) {
+  let u = 0, v = 0;
+  while (u === 0) u = rnd();
+  while (v === 0) v = rnd();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+/* --- 示例数据：2 班 × 22 人 × 3 次考试 --- */
+function generateSample() {
+  const rnd = mulberry32(20261029);
+  const surn = ['王', '李', '张', '刘', '陈', '杨', '赵', '黄', '周', '吴', '徐', '孙', '朱', '马', '胡', '郭', '林', '何', '高', '罗', '郑', '梁'];
+  const givA = ['嘉怡', '思远', '雨桐', '宇轩', '诗涵', '子墨', '欣然', '俊杰', '佳琪', '浩然', '婉清', '梓涵'];
+  const givB = ['一鸣', '若曦', '天佑', '静娴', '沐辰', '知夏', '语彤', '奕辰', '可欣', '致远', '芷若', '晨曦'];
+  const names = [];
+  for (let i = 0; i < 44; i++) {
+    const s = surn[i % surn.length], g = (i < 22 ? givA : givB)[Math.floor(i / 22) % 12];
+    names.push(s + g);
+  }
+  const mus = { chinese: 102, math: 97, english: 104, physics: 67, chem: 70, geo: 72 };
+  const sds = { chinese: 11, math: 19, english: 14, physics: 13, chem: 12, geo: 11 };
+  const maxs = { chinese: 150, math: 150, english: 150, physics: 100, chem: 100, geo: 100 };
+  const students = names.map((nm, i) => {
+    const h = gauss(rnd); // 个人综合水平
+    const abi = {};
+    for (const k of Object.keys(mus)) abi[k] = mus[k] + h * sds[k] * 0.55 + gauss(rnd) * sds[k] * 0.8;
+    return { studentId: 'S' + String(i + 1).padStart(3, '0'), name: nm, cls: i < 22 ? '高三(1)班' : '高三(2)班', abi };
+  });
+  const examNames = ['月考一', '期中考', '月考二'];
+  const exams = examNames.map((en, ei) => ({
+    name: en,
+    line1: 512, line2: 448,
+    students: students.map(st => {
+      const drift = gauss(rnd) * 2.5;
+      const row = { studentId: st.studentId, name: st.name, cls: st.cls };
+      for (const k of Object.keys(mus)) {
+        let v = st.abi[k] + drift + gauss(rnd) * sds[k] * 0.45;
+        v = Math.max(8, Math.min(maxs[k] - 2, v));
+        row[k] = Math.round(v);
+      }
+      return row;
+    }),
+  }));
+  // 示例数据也带上「学校官方年排」，让演示与新导入口径一致
+  const st = defaultSettings();
+  for (const ex of exams) {
+    const comp = computeExamData(ex, st, null);
+    const byId = new Map(comp.rows.map(r => [r.id, r]));
+    for (const s of ex.students) {
+      const r = byId.get(s.studentId);
+      if (r && r.totalRank != null) s.yearRank = r.totalRank;
+    }
+  }
+  return exams;
+}
+
+/* --- 档位、分数线、学生身份的安全兜底：只影响计算，不改写用户数据 --- */
+function safeBands(bands) {
+  const fallback = defaultSettings().bands;
+  if (!Array.isArray(bands) || !bands.length) return fallback;
+  const out = bands.map((b, i) => ({
+    name: b && b.name != null ? String(b.name) : (fallback[i] ? fallback[i].name : '档' + (i + 1)),
+    pct: Number(b && b.pct), min: Number(b && b.min), max: Number(b && b.max),
+  }));
+  const ok = out.every(b => Number.isFinite(b.pct) && b.pct >= 0 && b.pct <= 100 &&
+    Number.isFinite(b.min) && Number.isFinite(b.max) && b.min <= b.max && b.min >= 0 && b.max <= 100);
+  return ok ? out : fallback;
+}
+function lineNumberOrNull(v) {
+  if (v === '' || v == null) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+function resolveLines(exam, settings) {
+  const fallback = defaultSettings();
+  let l1 = lineNumberOrNull(exam && exam.line1);
+  let l2 = lineNumberOrNull(exam && exam.line2);
+  if (l1 == null) l1 = lineNumberOrNull(settings && settings.line1);
+  if (l2 == null) l2 = lineNumberOrNull(settings && settings.line2);
+  if (l1 == null || l1 < 0 || l1 > 750) l1 = fallback.line1;
+  if (l2 == null || l2 < 0 || l2 > 750) l2 = fallback.line2;
+  if (l2 >= l1) l2 = Math.max(0, l1 - (fallback.line1 - fallback.line2));
+  return { line1: l1, line2: l2 };
+}
+function examLine1(exam, settings) { return resolveLines(exam, settings).line1; }
+function examLine2(exam, settings) { return resolveLines(exam, settings).line2; }
+function scoreOrNull(v, max) {
+  const n = numOrNull(v);
+  return n == null || n < 0 || n > max ? null : n;
+}
+/* 学号优先；旧备份无学号时按「班级 + 姓名」对齐，避免不同班同名串人。
+   key 只用可安全放进 DOM 属性/URL 的字符，避免控制字符被浏览器改写。 */
+function studentIdentity(s) {
+  s = s || {};
+  const studentId = normalizeStudentId(typeof s.studentId !== 'undefined' ? s.studentId : (typeof s.id !== 'undefined' ? s.id : s.sid));
+  const name = normalizeCell(s.name);
+  const cls = normalizeCell(s.cls);
+  return {
+    studentId, name, cls,
+    key: studentId ? 'id:' + encodeURIComponent(studentId)
+      : (cls ? 'class:' + encodeURIComponent(cls) + ':' + encodeURIComponent(name)
+        : 'name:' + encodeURIComponent(name)),
+  };
+}
+function studentKey(s) { return studentIdentity(s).key; }
+
+/* --- 等级赋分（江苏：A15/B35/C35/D13/E2，档内线性插值） --- */
+function assignGrades(entries, bands) {
+  // entries: [{id, raw}] → Map id → {level, score}；diagnostics 记录实际档位占比
+  const res = new Map();
+  const useBands = safeBands(bands);
+  const list = entries.filter(e => e && e.id != null && e.raw != null && Number.isFinite(Number(e.raw)))
+    .map(e => ({ id: e.id, raw: Number(e.raw) }))
+    .sort((a, b) => b.raw - a.raw);
+  const n = list.length;
+  const counts = useBands.map(() => 0);
+  let tiedBoundary = 0;
+  if (n > 0) {
+    let prev = 0, cum = 0;
+    for (let bi = 0; bi < useBands.length; bi++) {
+      const band = useBands[bi];
+      cum += band.pct / 100;
+      const i0 = prev;
+      let i1 = bi === useBands.length - 1 ? n : Math.max(i0, Math.round(n * cum));
+      // 同分同档：档位边界若切开同分考生，把边界下移让同分进同一档
+      if (i1 > i0 && i1 < n) {
+        const v = list[i1 - 1].raw;
+        const before = i1;
+        while (i1 < n && list[i1].raw === v) i1++;
+        if (i1 > before) tiedBoundary++;
+      }
+      prev = i1;
+      if (i1 <= i0) continue;
+      counts[bi] = i1 - i0;
+      const hiRaw = list[i0].raw, loRaw = list[i1 - 1].raw;
+      const span = hiRaw - loRaw;
+      const bSpan = band.max - band.min;
+      for (let i = i0; i < i1; i++) {
+        const e = list[i];
+        let sc;
+        if (span > 0) sc = Math.round(band.min + (e.raw - loRaw) * bSpan / span);
+        else sc = Math.round((band.min + band.max) / 2);
+        sc = Math.max(band.min, Math.min(band.max, sc));
+        res.set(e.id, { level: band.name, score: sc });
+      }
+    }
+  }
+  const target = useBands.map(b => b.pct);
+  const actual = counts.map(c => n ? c / n * 100 : 0);
+  const maxDeviation = Math.max.apply(null, actual.map((v, i) => Math.abs(v - target[i])).concat([0]));
+  Object.defineProperty(res, 'diagnostics', {
+    value: { count: n, target, actual, counts, maxDeviation, tiedBoundary },
+    enumerable: false,
+  });
+  return res;
+}
+
+/* --- 并列名次（1,2,2,4 式）：dir=-1 降序 --- */
+function competitionRanks(items, valueOf, dir) {
+  dir = dir === undefined ? -1 : dir;
+  const ranks = new Map();
+  const list = items.filter(x => valueOf(x) != null && !isNaN(valueOf(x)))
+    .slice().sort((a, b) => dir * (valueOf(a) - valueOf(b)));
+  let i = 0;
+  while (i < list.length) {
+    const v = valueOf(list[i]);
+    let j = i;
+    while (j < list.length && valueOf(list[j]) === v) j++;
+    for (let k = i; k < j; k++) ranks.set(list[k], i + 1);
+    i = j;
+  }
+  return ranks;
+}
+
+/* --- 单场考试全量计算（按稳定学生 ID 对齐，越界分数按缺考处理） --- */
+function computeExamData(exam, settings, prevExam) {
+  const array = Array.isArray(exam && exam.students) ? exam.students : [];
+  const rows = array.map(s => {
+    const ident = studentIdentity(s);
+    return {
+      id: ident.key, studentId: ident.studentId,
+      name: ident.name || String(s && s.name || ''), cls: ident.cls,
+      yearRank: scoreOrNull(s.yearRank, 100000),
+      raw: {
+        chinese: scoreOrNull(s.chinese, 150), math: scoreOrNull(s.math, 150),
+        english: scoreOrNull(s.english, 150), physics: scoreOrNull(s.physics, 100),
+        chem: scoreOrNull(s.chem, 100), geo: scoreOrNull(s.geo, 100),
+      },
+      chemOv: scoreOrNull(s.chemScore, 100), geoOv: scoreOrNull(s.geoScore, 100),
+    };
+  });
+  const bands = settings && settings.bands;
+  const chemG = assignGrades(rows.filter(r => r.raw.chem != null).map(r => ({ id: r.id, raw: r.raw.chem })), bands);
+  const geoG = assignGrades(rows.filter(r => r.raw.geo != null).map(r => ({ id: r.id, raw: r.raw.geo })), bands);
+
+  const seen = new Set(), duplicateKeys = [];
+  for (const r of rows) {
+    if (seen.has(r.id)) duplicateKeys.push(r.id);
+    seen.add(r.id);
+    const cg = chemG.get(r.id), gg = geoG.get(r.id);
+    r.chemAssigned = r.chemOv != null ? r.chemOv : (cg ? cg.score : null);
+    r.geoAssigned = r.geoOv != null ? r.geoOv : (gg ? gg.score : null);
+    r.chemLevel = r.chemOv != null ? '—' : (cg ? cg.level : '—');
+    r.geoLevel = r.geoOv != null ? '—' : (gg ? gg.level : '—');
+    const p = CORE4.map(k => r.raw[k]);
+    r.total = (p.every(v => v != null) && r.chemAssigned != null && r.geoAssigned != null)
+      ? p[0] + p[1] + p[2] + p[3] + r.chemAssigned + r.geoAssigned : null;
+    r.subj = {
+      chinese: r.raw.chinese, math: r.raw.math, english: r.raw.english,
+      physics: r.raw.physics, chem: r.chemAssigned, geo: r.geoAssigned,
+    };
+  }
+  // 名次只覆盖本次导入名单；单科名次不写成「校/年级名次」
+  for (const s of SUBJECTS) {
+    const rk = competitionRanks(rows, r => r.subj[s.key]);
+    for (const r of rows) r[s.key + 'Rank'] = rk.get(r) || null;
+  }
+  const totalRk = competitionRanks(rows, r => r.total);
+  for (const r of rows) {
+    r.computedTotalRank = totalRk.get(r) || null;
+    const official = numOrNull(r.yearRank);
+    r.hasOfficialRank = official != null && Number.isInteger(official) && official > 0;
+    r.totalRank = r.hasOfficialRank ? official : r.computedTotalRank;
+  }
+  // 无班级信息时不凭空生成「班内排名」
+  for (const r of rows) r.classRank = null;
+  const byCls = new Map();
+  for (const r of rows) {
+    if (!r.cls) continue;
+    if (!byCls.has(r.cls)) byCls.set(r.cls, []);
+    byCls.get(r.cls).push(r);
+  }
+  for (const grp of byCls.values()) {
+    const rk = competitionRanks(grp, r => r.total);
+    for (const r of grp) r.classRank = rk.get(r) || null;
+  }
+  // 只有紧邻上一场、且同一学生都有有效总分时才算变化
+  const prevMap = new Map();
+  if (prevExam) {
+    const prevRows = computeExamData(prevExam, settings, null).rows; // 只需名次/总分，prev 已置 null 防递归
+    for (const pr of prevRows) if (!prevMap.has(pr.id)) prevMap.set(pr.id, pr);
+  }
+  for (const r of rows) {
+    const pr = prevMap.get(r.id);
+    r.prevTotal = pr ? pr.total : null;
+    r.prevRank = pr ? pr.totalRank : null;
+    r.totalDelta = (pr && r.total != null && pr.total != null) ? r.total - pr.total : null;
+    // 官方年排和按名单计算的年排不能直接相减，避免出现虚假的大幅升降
+    const rankComparable = pr && r.totalRank != null && pr.totalRank != null && r.hasOfficialRank === pr.hasOfficialRank;
+    r.rankDelta = rankComparable ? pr.totalRank - r.totalRank : null; // 正 = 名次上升
+    r.trend = r.totalDelta == null ? null : (r.totalDelta > 0 ? 'up' : (r.totalDelta < 0 ? 'down' : 'flat'));
+  }
+  // 上线
+  const lines = resolveLines(exam, settings);
+  const L1 = lines.line1, L2 = lines.line2;
+  for (const r of rows) {
+    if (r.total == null) { r.lineStatus = null; r.toLine1 = null; r.toLine2 = null; continue; }
+    r.lineStatus = r.total >= L1 ? '一本线上' : (r.total >= L2 ? '二本线上' : '未上线');
+    r.toLine1 = r.total - L1; r.toLine2 = r.total - L2;
+  }
+  // 统计（分母统一为有有效总分的人数）
+  const withTotal = rows.filter(r => r.total != null);
+  const avg = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+  const subjAvg = {};
+  for (const s of SUBJECTS) subjAvg[s.key] = avg(rows.map(r => r.subj[s.key]).filter(v => v != null));
+  const matched = rows.filter(r => r.totalDelta != null);
+  const l1c = withTotal.filter(r => r.total >= L1).length;
+  const l2c = withTotal.filter(r => r.total >= L2).length;
+  const gradeDiagnostics = {
+    chem: chemG.diagnostics, geo: geoG.diagnostics,
+    warning: Math.max(chemG.diagnostics.maxDeviation, geoG.diagnostics.maxDeviation) >= 8,
+  };
+  const stats = {
+    count: rows.length, validCount: withTotal.length,
+    avgTotal: avg(withTotal.map(r => r.total)),
+    line1Count: l1c, line2Count: l2c,
+    line1Rate: withTotal.length ? l1c / withTotal.length : null,
+    line2Rate: withTotal.length ? l2c / withTotal.length : null,
+    upCount: matched.filter(r => r.totalDelta > 0).length,
+    downCount: matched.filter(r => r.totalDelta < 0).length,
+    flatCount: matched.filter(r => r.totalDelta === 0).length,
+    subjAvg, line1: L1, line2: L2, duplicateKeys, gradeDiagnostics,
+  };
+  return { rows, stats };
+}
+
+function computeAll(data) {
+  const out = [];
+  for (let i = 0; i < data.exams.length; i++) {
+    out.push(computeExamData(data.exams[i], data.settings, i > 0 ? data.exams[i - 1] : null));
+  }
+  return out;
+}
+
+function numOrNull(v) {
+  if (v === '' || v == null) return null;
+  const n = Number(v);
+  return isNaN(n) ? null : n;
+}
+
+/* --- 多次考试后学生历史（按稳定 ID 对齐） --- */
+function studentHistory(computed, key) {
+  return computed.map(c => c.rows.find(x => x.id === key) || null);
+}
+
+/* --- 连续退步判定：只看最近的连续 k+1 场，缺考即不判定 --- */
+function continuousDecline(history, k) {
+  const tail = history.slice(-(k + 1));
+  if (tail.length < k + 1 || tail.some(r => !r || r.total == null)) return false;
+  for (let i = 1; i < tail.length; i++) if (tail[i].total >= tail[i - 1].total) return false;
+  return true;
+}
+
+function validateSettings(settings) {
+  const errors = [];
+  const bands = settings && settings.bands;
+  if (!Array.isArray(bands) || !bands.length) {
+    errors.push('赋分档位为空，已临时使用默认 5 档。');
+  } else {
+    const sum = bands.reduce((a, b) => a + (Number(b.pct) || 0), 0);
+    if (Math.abs(sum - 100) > 0.01) errors.push(`各档比例合计为 ${sum}%，应为 100%。`);
+    let prevMax = null;
+    bands.forEach((b, i) => {
+      const label = b.name || '第 ' + (i + 1) + ' 档';
+      if (!(Number(b.pct) >= 0 && Number(b.pct) <= 100)) errors.push(`${label}：比例须在 0–100% 之间。`);
+      if (!(Number(b.min) >= 0 && Number(b.max) <= 100 && Number(b.min) <= Number(b.max))) {
+        errors.push(`${label}：赋分区间须在 0–100 分之间，且下限不大于上限。`);
+      }
+      if (prevMax != null && Number(b.min) <= prevMax) errors.push(`${label}：赋分下限须高于上一档上限。`);
+      prevMax = Number(b.max);
+    });
+  }
+  const l1 = Number(settings && settings.line1), l2 = Number(settings && settings.line2);
+  if (!Number.isFinite(l1) || l1 < 0 || l1 > 750) errors.push('默认本一线须在 0–750 分之间。');
+  if (!Number.isFinite(l2) || l2 < 0 || l2 > 750) errors.push('默认本二线须在 0–750 分之间。');
+  if (Number.isFinite(l1) && Number.isFinite(l2) && l2 >= l1) errors.push('默认本二线须低于本一线。');
+  return errors;
+}
+
+function dataWarnings(exams, settings) {
+  const out = validateSettings(settings);
+  for (let i = 0; i < exams.length; i++) {
+    const ex = exams[i];
+    const l1 = Number(ex.line1), l2 = Number(ex.line2);
+    if (Number.isFinite(l1) && (l1 < 0 || l1 > 750)) out.push(`「${ex.name}」本一线 ${l1} 超出 0–750，计算时已用默认值。`);
+    if (Number.isFinite(l2) && (l2 < 0 || l2 > 750)) out.push(`「${ex.name}」本二线 ${l2} 超出 0–750，计算时已用默认值。`);
+    if (Number.isFinite(l1) && Number.isFinite(l2) && l2 >= l1) out.push(`「${ex.name}」本二线不低于本一线，计算时已自动调整。`);
+    const students = Array.isArray(ex.students) ? ex.students : [];
+    const seen = new Set(), dup = [];
+    for (const s of students) {
+      const key = studentKey(s);
+      if (seen.has(key)) dup.push(s.name || key);
+      seen.add(key);
+    }
+    if (dup.length) out.push(`「${ex.name}」有 ${dup.length} 条重复身份（${dup.slice(0, 3).join('、')}${dup.length > 3 ? '…' : ''}），跨场对比会取第一条；请补学号并重导。`);
+    const withId = students.filter(s => studentIdentity(s).studentId).length;
+    if (students.length && !withId) out.push(`「${ex.name}」没有学号，按「班级 + 姓名」临时对齐；同名/改名/转班时建议补学号。`);
+  }
+  return out;
+}
+
+/* --- 成绩模板 / 规范导出 --- */
+const GRADE_TEMPLATE_HEADERS = ['学号', '姓名', '班级', '年级排名', '语文', '数学', '英语', '物理', '化学', '地理', '化学赋分', '地理赋分'];
+const IMPORT_SCORE_FIELDS = [
+  { key: 'chinese', label: '语文', max: 150 },
+  { key: 'math', label: '数学', max: 150 },
+  { key: 'english', label: '英语', max: 150 },
+  { key: 'physics', label: '物理', max: 100 },
+  { key: 'chem', label: '化学', max: 100 },
+  { key: 'geo', label: '地理', max: 100 },
+  { key: 'chemScore', label: '化学赋分', max: 100 },
+  { key: 'geoScore', label: '地理赋分', max: 100 },
+];
+const IMPORT_SCORE_MAX = {};
+for (const f of IMPORT_SCORE_FIELDS) IMPORT_SCORE_MAX[f.key] = f.max;
+
+function csvEscape(v) {
+  const s = String(v == null ? '' : v);
+  return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+function csvCellNum(v) {
+  return v == null || v === '' || isNaN(Number(v)) ? '' : v;
+}
+/* 名单模板带学号，保证跨场追踪与重名区分 */
+function buildTemplateCsv(students) {
+  const rows = [GRADE_TEMPLATE_HEADERS.slice()];
+  for (const s of (students || [])) {
+    rows.push([
+      s.studentId || '', s.name || '', s.cls || '', csvCellNum(s.yearRank),
+      csvCellNum(s.chinese), csvCellNum(s.math), csvCellNum(s.english), csvCellNum(s.physics),
+      csvCellNum(s.chem), csvCellNum(s.geo), csvCellNum(s.chemScore), csvCellNum(s.geoScore),
+    ]);
+  }
+  return String.fromCharCode(0xFEFF) + rows.map(r => r.map(csvEscape).join(',')).join('\r\n') + '\r\n';
+}
+/* 本场规范化成绩表（含原始分、赋分、总分、名次、上线） */
+function buildGradesExportCsv(rows) {
+  const head = ['学号', '姓名', '班级', '年级排名', '语文', '数学', '英语', '物理', '化学原始分', '地理原始分', '化学赋分', '地理赋分', '总分', '班内排名', '上线'];
+  const out = [head.map(csvEscape).join(',')];
+  for (const r of (rows || [])) {
+    out.push([
+      r.studentId || '', r.name, r.cls, csvCellNum(r.totalRank),
+      csvCellNum(r.raw.chinese), csvCellNum(r.raw.math), csvCellNum(r.raw.english), csvCellNum(r.raw.physics),
+      csvCellNum(r.raw.chem), csvCellNum(r.raw.geo),
+      csvCellNum(r.chemAssigned), csvCellNum(r.geoAssigned),
+      csvCellNum(r.total), csvCellNum(r.classRank), r.lineStatus || '',
+    ].map(csvEscape).join(','));
+  }
+  return String.fromCharCode(0xFEFF) + out.join('\r\n') + '\r\n';
+}
+
+/* --- 导入解析：CSV / TSV，自动识别表头、汇总行、空班级、无关列 --- */
+function splitImportLines(text) {
+  const lines = String(text == null ? '' : text).replace(/^\uFEFF/, '').split(/\r\n|\n|\r/).map(l => l.replace(/\u00A0/g, ' ').trimEnd());
+  while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();
+  return lines;
+}
+function normalizeCell(raw) {
+  let s = String(raw == null ? '' : raw);
+  s = s.replace(/\u00A0/g, ' ').replace(/\u3000/g, ' ');
+  // 全角 ASCII（数字、字母、括号、逗号等）转半角
+  s = s.replace(/[！-～]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
+  return s.replace(/\s+/g, ' ').trim();
+}
+function normalizeHeader(raw) {
+  return normalizeCell(raw).replace(/[\s（）()【】\[\]：:·.、]/g, '');
+}
+function detectDelimiter(lines) {
+  let tab = 0, comma = 0, semi = 0;
+  for (const ln of lines.slice(0, 30)) {
+    tab += (ln.match(/\t/g) || []).length;
+    comma += (ln.match(/,/g) || []).length;
+    semi += (ln.match(/;/g) || []).length;
+  }
+  if (tab > 0) return '\t';
+  if (semi > comma) return ';';
+  return ',';
+}
+function splitImportLine(line, delim) {
+  const out = [];
+  let cur = '', quoted = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (quoted) {
+      if (ch === '"') {
+        if (line[i + 1] === '"') { cur += '"'; i++; }
+        else quoted = false;
+      } else cur += ch;
+    } else if (ch === '"') {
+      quoted = true;
+    } else if (ch === delim) {
+      out.push(cur); cur = '';
+    } else cur += ch;
+  }
+  out.push(cur);
+  return out.map(normalizeCell);
+}
+
+const HEADER_IGNORE_RE = /(序号|编号|总分|合计|小计|统计|人数|平均|均分|最高|最低|及格率|优秀率|标准差|中位数|排名|名次|位次|等第|备注|联系|电话|地址|特长|评语)/;
+function subjectHeaderScore(s, label) {
+  if (s === label) return 100;
+  if (s === label + '成绩' || s === label + '分数' || s === label + '原始分' || s === label + '得分') return 95;
+  if (s.startsWith(label)) return 85;
+  if (s.includes(label)) return 70;
+  return 0;
+}
+function headerMatch(raw) {
+  const s = normalizeHeader(raw);
+  if (!s) return null;
+  if (/(学号|考号|考生号|学籍号|准考证号)/.test(s) && !/(姓名|班级)/.test(s)) return { key: 'studentId', score: 100 };
+  if (/(姓名|名字)/.test(s) && !/(拼音|家长|教师|老师)/.test(s)) return { key: 'name', score: 100 };
+  if (/^(学生|考生)$/.test(s)) return { key: 'name', score: 90 };
+  // 年级排名（学校官方年排）：优先于普通的“排名/名次”忽略规则
+  if (/(年级排名|年级名次|全年级排名|全校排名|校排名|校名次|年排|总分排名|总排名)/.test(s)
+      && !/(班级|班内|班排|班名次|单科|学科|语文|数学|英语|外语|物理|化学|地理|省|市|区|变化|升降)/.test(s)) {
+    return { key: 'yearRank', score: 100 };
+  }
+  if (/(名次|排名|位次)/.test(s)
+      && !/(班级|班内|班排|班名次|单科|学科|语文|数学|英语|外语|物理|化学|地理|省|市|区|变化|升降)/.test(s)) {
+    return { key: 'yearRank', score: 70 };
+  }
+  if (/(班级|班别|班次|行政班|教学班)/.test(s) || s === '班' || s === 'class') {
+    if (/(排名|名次|人数|编号)/.test(s)) return null;
+    return { key: 'cls', score: 100 };
+  }
+  const assigned = /(赋分|等级分|等级成绩|等级赋分|转换分|转换成绩|标准分)/.test(s);
+  const subScore = /(听力|口语|实验|附加|选做|教师|老师)/.test(s) && !/(含听力|含口语|含实验)/.test(s);
+  if (assigned && /化学/.test(s) && !subScore && !/化学与生活/.test(s)) return { key: 'chemScore', score: 96 };
+  if (assigned && /地理/.test(s) && !subScore) return { key: 'geoScore', score: 96 };
+  if (HEADER_IGNORE_RE.test(s)) return null;
+  if (subScore) return null;
+  if (/(排名|名次|位次|等第|等级)/.test(s)) return null;
+  if (/化学/.test(s) && !/化学与生活/.test(s)) return { key: 'chem', score: subjectHeaderScore(s, '化学') };
+  if (/地理/.test(s)) return { key: 'geo', score: subjectHeaderScore(s, '地理') };
+  if (/语文/.test(s)) return { key: 'chinese', score: subjectHeaderScore(s, '语文') };
+  if (/数学/.test(s)) return { key: 'math', score: subjectHeaderScore(s, '数学') };
+  if (/英语/.test(s) || /外语/.test(s)) return { key: 'english', score: subjectHeaderScore(s, /外语/.test(s) ? '外语' : '英语') };
+  if (/物理/.test(s)) return { key: 'physics', score: subjectHeaderScore(s, '物理') };
+  return null;
+}
+function buildHeaderCandidate(cells, index) {
+  const map = {}, picked = {};
+  let score = 0, subjCount = 0, hasName = false;
+  cells.forEach((c, j) => {
+    const m = headerMatch(c);
+    if (!m || !m.score) return;
+    if (m.key === 'name') { hasName = true; score += 30; if (map.name == null) map.name = j; }
+    else if (m.key === 'studentId') { score += 8; if (map.studentId == null) map.studentId = j; }
+    else if (m.key === 'cls') { score += 5; if (map.cls == null) map.cls = j; }
+    else if (m.key === 'yearRank') {
+      if (!picked.yearRank || m.score > picked.yearRank.score) {
+        picked.yearRank = { score: m.score, idx: j };
+        map.yearRank = j;
+      }
+      score += m.score * 0.2;
+    }
+    else {
+      subjCount++;
+      if (!picked[m.key] || m.score > picked[m.key].score) {
+        picked[m.key] = { score: m.score, idx: j };
+        map[m.key] = j;
+        score += m.score;
+      } else {
+        score += m.score * 0.2;
+      }
+    }
+  });
+  return { index, map, score, subjCount, hasName, cells };
+}
+function findHeader(lines, delim) {
+  let best = null;
+  const scan = Math.min(lines.length, 15);
+  for (let i = 0; i < scan; i++) {
+    const cells = splitImportLine(lines[i], delim);
+    if (cells.length < 2) continue;
+    const cand = buildHeaderCandidate(cells, i);
+    if (cand.hasName && (!best || cand.score > best.score)) best = cand;
+  }
+  return best;
+}
+const SUB_HEADER_RE = /^(原始分|裸分|卷面分|卷面|赋分|等级分|转换分|标准分|等级|成绩|分数|得分|选考|必考)$/;
+function isSubHeaderCells(cells) {
+  const words = cells.map(normalizeHeader).filter(Boolean);
+  if (!words.length) return false;
+  const n = words.filter(w => SUB_HEADER_RE.test(w)).length;
+  return n >= 1 && n >= Math.ceil(words.length * 0.5);
+}
+/* 把「科目 / 原始分·赋分」两行表头合成一行；合并单元格留空时向左继承科目 */
+function mergeHeaderCells(mainCells, subCells) {
+  const total = Math.max(mainCells.length, subCells.length);
+  const combined = [];
+  let lastSubjectParent = '';
+  for (let j = 0; j < total; j++) {
+    const main = normalizeCell(mainCells[j] || '');
+    const sub = normalizeCell(subCells[j] || '');
+    let parent = main;
+    if (parent) {
+      const m = headerMatch(parent);
+      if (m && !['name', 'studentId', 'cls', 'yearRank'].includes(m.key)) lastSubjectParent = parent;
+    } else if (lastSubjectParent) {
+      const m = headerMatch(lastSubjectParent);
+      if (m && !['name', 'studentId', 'cls', 'yearRank'].includes(m.key)) parent = lastSubjectParent;
+    }
+    combined.push(normalizeHeader(parent + ' ' + sub));
+  }
+  return combined;
+}
+
+const BLANK_SCORE_RE = /^(缺考|缺|免考|旷考|未考|无|—|-{1,2}|－|\/|n\/a|na|null)$/i;
+function parseImportScore(raw) {
+  const s = normalizeCell(raw);
+  if (!s) return { value: null };
+  if (BLANK_SCORE_RE.test(s)) return { value: null };
+  const t = s.replace(/[\s分]/g, '');
+  if (t === '') return { value: null };
+  const n = Number(t);
+  if (!isFinite(n)) return { value: null, error: true, raw: s };
+  return { value: n };
+}
+function parseRankValue(raw) {
+  const s = normalizeCell(raw);
+  if (!s) return { value: null };
+  if (BLANK_SCORE_RE.test(s)) return { value: null };
+  const t = s.replace(/[第名位次\s]/g, '');
+  if (t === '') return { value: null };
+  const n = Number(t);
+  if (!isFinite(n)) return { value: null, error: true, raw: s };
+  return { value: n };
+}
+function applyYearRank(row, raw, lineNo, errors) {
+  const p = parseRankValue(raw);
+  if (p.error) {
+    errors.push(`第 ${lineNo} 行：「${p.raw}」不是有效的年级排名`);
+    row.yearRank = null;
+    return;
+  }
+  if (p.value == null) { row.yearRank = null; return; }
+  if (!Number.isInteger(p.value) || p.value < 1) {
+    errors.push(`第 ${lineNo} 行：年级排名「${normalizeCell(raw)}」应为大于 0 的整数`);
+    row.yearRank = null;
+    return;
+  }
+  row.yearRank = p.value;
+}
+const AGGREGATE_RE = /^(合计|总计|小计|平均分?|均分|班级平均|年级平均|全校平均|最高分|最低分|及格率|优秀率|标准差|中位数|人数|统计)/;
+function isAggregateRow(cells) {
+  return cells.slice(0, 3).some(c => AGGREGATE_RE.test(normalizeCell(c)));
+}
+function looksLikeName(raw) {
+  const s = normalizeCell(raw);
+  if (!s) return false;
+  if (/^(姓名|名字|学生|学生姓名|考生姓名|合计|总计|平均|均分|班级|序号|学号|备注|说明)/.test(s)) return false;
+  if (/^\d+(\.\d+)?$/.test(s)) return false;
+  return /^[㐀-鿿·•]{1,10}$/.test(s) || /^[A-Za-z][A-Za-z .'\-]{1,30}$/.test(s);
+}
+function parseImportScoreField(row, cells, idx, key, label, max, lineNo, errors) {
+  const parsed = parseImportScore(idx != null ? cells[idx] : '');
+  if (parsed.error) {
+    errors.push(`第 ${lineNo} 行：「${parsed.raw}」不是数字（${label}）`);
+    row[key] = null;
+    return null;
+  }
+  if (parsed.value != null && (parsed.value < 0 || parsed.value > max)) {
+    errors.push(`第 ${lineNo} 行：${label} ${parsed.value} 超出 0–${max}，已拦截导入；请修正源表`);
+    row[key] = null;
+    return null;
+  }
+  row[key] = parsed.value;
+  return parsed.value;
+}
+function normalizeStudentId(raw) {
+  return normalizeCell(raw).replace(/[\s\-—－]/g, '');
+}
+
+function parseHeaderTable(lines, delim, header, opts) {
+  opts = opts || {};
+  const errors = [], notes = [];
+  const map = header.map;
+  if (map.name == null) return { students: [], errors: ['表头里没找到「姓名」列'], notes: [], meta: null };
+  if (header.subjCount < 1) return { students: [], errors: ['识别到表头，但没找到任何科目列（语文/数学/英语/物理/化学/地理）'], notes: [], meta: null };
+
+  const headerCells = header.cells || splitImportLine(lines[header.index], delim);
+  const mappedIdx = new Set(Object.values(map));
+  const ignoredCols = headerCells.map((c, i) => ({ c: normalizeCell(c), i }))
+    .filter(x => x.c && !mappedIdx.has(x.i)).map(x => x.c);
+  const subjectKeys = ['chinese', 'math', 'english', 'physics', 'chem', 'geo'];
+  const present = subjectKeys.filter(k => map[k] != null || (k === 'chem' && map.chemScore != null) || (k === 'geo' && map.geoScore != null));
+  const missing = subjectKeys.filter(k => present.indexOf(k) < 0);
+
+  notes.push(`已识别表头（第 ${header.index + 1}${header.subRows ? '–' + (header.index + 1 + header.subRows) : ''} 行）`);
+  if (map.studentId != null) notes.push('已识别学号列（优先按学号跨场追踪）');
+  else notes.push('未找到学号列：建议用新模板补齐，重名学生将无法可靠区分');
+  if (map.yearRank != null) {
+    const yrLabel = normalizeCell(headerCells[map.yearRank] || '');
+    notes.push(`年级排名列：${yrLabel || '已识别'}（采用学校官方年排）`);
+  } else if (opts.requireYearRank) {
+    notes.push('未识别到年级排名列（必填）');
+  }
+  if (missing.length) notes.push(`未识别到 ${missing.map(k => (IMPORT_SCORE_FIELDS.find(f => f.key === k) || {}).label).join('、')} 列，按空分处理`);
+  if (map.cls == null) notes.push('未找到班级列，班级留空');
+  if (ignoredCols.length) notes.push(`忽略 ${ignoredCols.length} 个无关列：${ignoredCols.slice(0, 8).join('、')}${ignoredCols.length > 8 ? '…' : ''}`);
+  if (map.chemScore != null) notes.push('化学赋分列会覆盖公式计算结果');
+  if (map.geoScore != null) notes.push('地理赋分列会覆盖公式计算结果');
+
+  const students = [], seen = new Set(), seenNames = new Map();
+  let duplicateKeys = 0;
+  let lastCls = '', filled = 0, skipped = 0, blankRows = 0;
+  for (let li = header.index + 1 + (header.subRows || 0); li < lines.length; li++) {
+    const cells = splitImportLine(lines[li], delim);
+    if (!cells.some(c => normalizeCell(c) !== '')) continue;
+    if (isAggregateRow(cells)) { skipped++; continue; }
+    if (cells.slice(0, 2).some(c => /^(注|说明|备注)[:：]?/.test(normalizeCell(c)))) { skipped++; continue; }
+    if (map.studentId != null && /^(学号|考号|考生号|学籍号)/.test(normalizeHeader(cells[map.studentId] || ''))) { skipped++; continue; }
+    const name = normalizeCell(cells[map.name] || '');
+    if (!name) {
+      const nonEmpty = cells.map(normalizeCell).filter(Boolean);
+      const subWords = nonEmpty.filter(c => SUB_HEADER_RE.test(normalizeHeader(c))).length;
+      if (subWords && subWords >= Math.ceil(nonEmpty.length * 0.6)) { skipped++; continue; }
+      if (nonEmpty.length) errors.push(`第 ${li + 1} 行：姓名为空，已跳过`);
+      continue;
+    }
+    if (/^(姓名|学生姓名|名字)[:：]?$/.test(name)) { skipped++; continue; }
+    let cls = map.cls != null ? normalizeCell(cells[map.cls] || '') : '';
+    if (!cls && lastCls) { cls = lastCls; filled++; }
+    if (cls) lastCls = cls;
+    const studentId = map.studentId != null ? normalizeStudentId(cells[map.studentId]) : '';
+    const row = { studentId, name, cls };
+    let blanks = 0;
+    for (const f of IMPORT_SCORE_FIELDS) {
+      if (map[f.key] == null) { row[f.key] = null; continue; }
+      const v = parseImportScoreField(row, cells, map[f.key], f.key, f.label, f.max, li + 1, errors);
+      if (v == null) blanks++;
+    }
+    if (blanks) blankRows++;
+    applyYearRank(row, map.yearRank != null ? cells[map.yearRank] : '', li + 1, errors);
+    const key = studentKey(row);
+    if (seen.has(key)) {
+      duplicateKeys++;
+      errors.push(`第 ${li + 1} 行：学生「${name}」与前面重复（${studentId || '班级 + 姓名'}），已拦截导入；请补唯一学号或改名后缀`);
+    }
+    seen.add(key);
+    if (!studentId && seenNames.has(name) && seenNames.get(name) !== cls) {
+      errors.push(`第 ${li + 1} 行：不同班级出现同名「${name}」，且没有学号，已拦截导入`);
+    }
+    if (!studentId) seenNames.set(name, cls);
+    students.push(row);
+  }
+  if (!map.studentId && students.length) notes.push(`${students.length} 人未带学号：按「班级 + 姓名」临时对齐，建议改用新模板`);
+  if (map.studentId != null) {
+    const blankIds = students.filter(s => !s.studentId).length;
+    if (blankIds) errors.push(`有 ${blankIds} 人学号为空，已拦截导入；请补齐唯一学号`);
+  }
+  const missingYearRank = students.filter(s => s.yearRank == null).length;
+  if (opts.requireYearRank && missingYearRank) {
+    errors.push(map.yearRank == null
+      ? `年级排名为必填：没有识别到「年级排名 / 年排 / 排名」列（缺 ${missingYearRank} 人）`
+      : `年级排名为必填：有 ${missingYearRank} 人未填写或填写无效`);
+  }
+  if (filled) notes.push(`补全 ${filled} 行空班级（按上一行向下填充）`);
+  if (skipped) notes.push(`跳过 ${skipped} 行汇总/说明行`);
+  if (blankRows) notes.push(`有 ${blankRows} 行存在空分（按缺考处理）`);
+  if (!students.length && !errors.length) errors.push('没有解析出学生，请检查内容和表头');
+  return { students, errors, notes, meta: {
+    mode: 'header', headerRow: header.index + 1, skipped, filledClass: filled, ignored: ignoredCols,
+    yearRankColumn: map.yearRank != null, missingYearRank, requireYearRank: !!opts.requireYearRank,
+  } };
+}
+
+function nameColumnScore(vals) {
+  let like = 0, nonEmpty = 0;
+  const set = new Set();
+  for (const raw of vals) {
+    const s = normalizeCell(raw);
+    if (!s) continue;
+    nonEmpty++;
+    set.add(s);
+    if (looksLikeName(s)) like++;
+  }
+  if (!nonEmpty) return -Infinity;
+  const uniqRatio = set.size / nonEmpty;
+  let score = like;
+  if (uniqRatio > 0.8) score += nonEmpty * 0.5;
+  if (uniqRatio < 0.35) score -= nonEmpty * 0.8;
+  return score;
+}
+function subjectColumnScore(vals, max) {
+  let nonEmpty = 0, num = 0, inRange = 0, meaningful = 0;
+  for (const raw of vals) {
+    const s = normalizeCell(raw);
+    if (!s) continue;
+    nonEmpty++;
+    const p = parseImportScore(raw);
+    if (p.error || p.value == null) continue;
+    num++;
+    if (p.value >= 0 && p.value <= max) inRange++;
+    if (p.value > max * 0.12) meaningful++;
+  }
+  if (!nonEmpty) return 0;
+  if (num / nonEmpty < 0.5) return -2;
+  if (inRange / num < 0.8) return -1;
+  if (meaningful / num < 0.5) return 0.8;
+  return 2;
+}
+function classColumnScore(vals) {
+  const ne = [];
+  for (const raw of vals) { const s = normalizeCell(raw); if (s) ne.push(s); }
+  if (!ne.length) return 0;
+  const textVals = ne.filter(v => isNaN(Number(v)));
+  const nums = ne.filter(v => !isNaN(Number(v))).map(Number);
+  const uniq = new Set(ne).size;
+  if (textVals.length / ne.length >= 0.6) {
+    if (ne.some(v => /班|级|部|系/.test(v)) || uniq <= 20) return 3;
+    return -4;
+  }
+  if (nums.length && uniq <= Math.max(3, Math.ceil(ne.length * 0.4)) && nums.every(v => v >= 0 && v <= 100)) return 2;
+  return -4;
+}
+function studentIdColumnScore(vals) {
+  const ne = vals.map(normalizeCell).filter(Boolean);
+  if (ne.length < 2) return 0;
+  const uniq = new Set(ne).size / ne.length;
+  const sequential = ne.every(v => /^\d{1,3}$/.test(v)) &&
+    ne.map(Number).sort((a, b) => a - b).every((v, i) => v === i + 1);
+  const idLike = ne.filter(v => /^[A-Za-z0-9_-]{4,32}$/.test(v) && /\d/.test(v) && !/^\d{1,3}$/.test(v)).length;
+  return uniq > 0.8 && !sequential && idLike / ne.length >= 0.8 ? 2 : 0;
+}
+function extraColumnKind(vals) {
+  let nums = [], nonEmpty = 0;
+  for (const raw of vals) {
+    const s = normalizeCell(raw);
+    if (!s) continue;
+    nonEmpty++;
+    const p = parseImportScore(raw);
+    if (p.error || p.value == null) continue;
+    nums.push(p.value);
+  }
+  if (!nonEmpty) return 'empty';
+  if (nums.length / nonEmpty < 0.6) return 'other';
+  if (nums.some(v => v > 150)) return 'total';
+  if (nums.some(v => v < 20)) return 'rank';
+  if (nums.every(v => v >= 0 && v <= 150)) return 'assigned';
+  return 'other';
+}
+
+function parseNoHeaderTable(lines, delim, opts) {
+  opts = opts || {};
+  const rawRows = [];
+  for (let i = 0; i < lines.length; i++) {
+    const cells = splitImportLine(lines[i], delim);
+    if (cells.some(c => c !== '')) rawRows.push({ line: i + 1, cells });
+  }
+  if (!rawRows.length) return { students: [], errors: ['没有内容'], notes: [], meta: null };
+
+  const maxLen = Math.max.apply(null, rawRows.map(r => r.cells.length));
+  // 1. 找姓名列（唯一性高的中文姓名列）
+  let nameIdx = 0, bestNameScore = -Infinity;
+  for (let j = 0; j < Math.min(6, maxLen); j++) {
+    const sc = nameColumnScore(rawRows.map(r => r.cells[j] == null ? '' : r.cells[j]));
+    if (sc > bestNameScore) { bestNameScore = sc; nameIdx = j; }
+  }
+  if (!isFinite(bestNameScore) || bestNameScore <= 0) nameIdx = 0;
+
+  // 2. 找六科起始列（允许姓名与成绩之间夹班级/序号列）
+  const start = nameIdx + 1;
+  let bestStart = -1, bestScore = -Infinity;
+  for (let s = start; s <= Math.min(start + 3, maxLen - 1); s++) {
+    let sc = 0, valid = 0;
+    for (let k = 0; k < 6; k++) {
+      const one = subjectColumnScore(rawRows.map(r => r.cells[s + k] == null ? '' : r.cells[s + k]), SUBJECTS[k].max);
+      if (one > 0) valid++;
+      sc += one;
+    }
+    if (valid < 2) continue;
+    if (s === start) sc += 0.5;
+    if (sc > bestScore) { bestScore = sc; bestStart = s; }
+  }
+  if (bestStart < 0) {
+    return {
+      students: [], errors: ['没识别到表头，也无法按列位置识别成绩。建议先点「下载空白模板」按模板填写，或确认每行包含姓名和 6 科成绩。'],
+      notes: [], meta: null,
+    };
+  }
+
+  // 3. 学号 / 班级列：姓名与成绩之间，或姓名之前
+  let clsIdx = -1, studentIdIdx = -1;
+  const colVals = j => rawRows.map(r => r.cells[j] == null ? '' : r.cells[j]);
+  for (let j = start; j < bestStart; j++) {
+    if (studentIdIdx < 0 && studentIdColumnScore(colVals(j)) > 0) { studentIdIdx = j; continue; }
+    if (clsIdx < 0 && classColumnScore(colVals(j)) > 0) clsIdx = j;
+  }
+  if (nameIdx > 0) {
+    if (studentIdIdx < 0 && studentIdColumnScore(colVals(nameIdx - 1)) > 0) studentIdIdx = nameIdx - 1;
+    if (clsIdx < 0 && classColumnScore(colVals(nameIdx - 1)) > 0) clsIdx = nameIdx - 1;
+  }
+  if (studentIdIdx === clsIdx) studentIdIdx = -1;
+  // 常见老格式：姓名 + 班级 + 六科（正好 8 列）直接认定，
+  // 避免把某一科里的错字（如 "abc"）当成"额外列"跳过去。
+  if (bestStart > start && clsIdx === start && maxLen === nameIdx + 8) bestStart = start + 1;
+
+  // 4. 多出来的列：赋分 / 总分 / 名次 / 备注
+  const extraStart = bestStart + 6;
+  let chemScoreIdx = null, geoScoreIdx = null, yearRankIdx = null, ignoredExtras = 0;
+  for (let j = extraStart; j < maxLen; j++) {
+    const kind = extraColumnKind(rawRows.map(r => r.cells[j] == null ? '' : r.cells[j]));
+    if (kind === 'assigned') {
+      if (chemScoreIdx == null) chemScoreIdx = j;
+      else if (geoScoreIdx == null) geoScoreIdx = j;
+      else ignoredExtras++;
+    } else if (kind === 'rank') {
+      if (yearRankIdx == null) yearRankIdx = j;
+      else ignoredExtras++;
+    } else if (kind !== 'empty') {
+      ignoredExtras++;
+    }
+  }
+  // 有些表把年排放在姓名和成绩之间
+  if (yearRankIdx == null) {
+    for (let j = start; j < bestStart; j++) {
+      if (j === clsIdx) continue;
+      if (extraColumnKind(rawRows.map(r => r.cells[j] == null ? '' : r.cells[j])) === 'rank') { yearRankIdx = j; break; }
+    }
+  }
+  const ignoredBefore = Math.max(0, bestStart - start
+    - (clsIdx >= start && clsIdx < bestStart ? 1 : 0)
+    - (studentIdIdx >= start && studentIdIdx < bestStart ? 1 : 0)
+    - (yearRankIdx != null && yearRankIdx >= start && yearRankIdx < bestStart && yearRankIdx !== clsIdx && yearRankIdx !== studentIdIdx ? 1 : 0));
+
+  // 5. 解析
+  const students = [], errors = [], notes = [];
+  const seen = new Set(), seenNames = new Map();
+  let duplicateKeys = 0;
+  let lastCls = '', filled = 0, skipped = 0, blankRows = 0;
+  for (const r of rawRows) {
+    const cells = r.cells;
+    if (isAggregateRow(cells)) { skipped++; continue; }
+    if (studentIdIdx >= 0 && /^(学号|考号|考生号|学籍号)/.test(normalizeHeader(cells[studentIdIdx] || ''))) { skipped++; continue; }
+    const name = normalizeCell(cells[nameIdx] || '');
+    if (!name) {
+      if (cells.some(c => normalizeCell(c) !== '')) errors.push(`第 ${r.line} 行：姓名为空，已跳过`);
+      continue;
+    }
+    if (/^(姓名|学生姓名|名字|备注|说明|注)[:：]?/.test(name)) { skipped++; continue; }
+    if (!looksLikeName(name) && cells.filter(c => normalizeCell(c) !== '').length <= 2) { skipped++; continue; }
+    let cls = clsIdx >= 0 ? normalizeCell(cells[clsIdx] || '') : '';
+    if (!cls && lastCls) { cls = lastCls; filled++; }
+    if (cls) lastCls = cls;
+    const studentId = studentIdIdx >= 0 ? normalizeStudentId(cells[studentIdIdx]) : '';
+    const row = { studentId, name, cls };
+    let blanks = 0;
+    for (let k = 0; k < 6; k++) {
+      const f = IMPORT_SCORE_FIELDS[k];
+      const v = parseImportScoreField(row, cells, bestStart + k, f.key, f.label, f.max, r.line, errors);
+      if (v == null) blanks++;
+    }
+    row.chemScore = null; row.geoScore = null;
+    parseImportScoreField(row, cells, chemScoreIdx, 'chemScore', '化学赋分', 100, r.line, errors);
+    parseImportScoreField(row, cells, geoScoreIdx, 'geoScore', '地理赋分', 100, r.line, errors);
+    const allSubjectBlank = IMPORT_SCORE_FIELDS.slice(0, 6).every(f => row[f.key] == null);
+    if (allSubjectBlank && row.chemScore == null && row.geoScore == null) { skipped++; continue; }
+    applyYearRank(row, yearRankIdx != null ? cells[yearRankIdx] : '', r.line, errors);
+    if (blanks) blankRows++;
+    const key = studentKey(row);
+    if (seen.has(key)) {
+      duplicateKeys++;
+      errors.push(`第 ${r.line} 行：学生「${name}」与前面重复（${studentId || '班级 + 姓名'}），已拦截导入；请补唯一学号或改名后缀`);
+    }
+    seen.add(key);
+    if (!studentId && seenNames.has(name) && seenNames.get(name) !== cls) {
+      errors.push(`第 ${r.line} 行：不同班级出现同名「${name}」，且没有学号，已拦截导入`);
+    }
+    if (!studentId) seenNames.set(name, cls);
+    students.push(row);
+  }
+
+  notes.push('未识别到表头，已按列位置自动整理（建议下次用「下载空白模板」）');
+  notes.push(`识别为：${studentIdIdx >= 0 ? '学号 + ' : ''}姓名${clsIdx >= 0 ? ' + 班级' : ''} + 六科`);
+  if (studentIdIdx < 0 && students.length) notes.push(`${students.length} 人未带学号：按「班级 + 姓名」临时对齐，建议改用新模板`);
+  if (studentIdIdx >= 0 && students.some(s => !s.studentId)) errors.push('有学生学号为空，已拦截导入；请补齐唯一学号');
+  if (yearRankIdx != null) notes.push('识别到年级排名列（无表头时按名次列处理）');
+  else if (opts.requireYearRank) notes.push('未识别到年级排名列（必填）');
+  if (chemScoreIdx != null || geoScoreIdx != null) notes.push('识别到赋分列（无表头时按出现顺序作为化学赋分、地理赋分）');
+  if (ignoredExtras) notes.push(`忽略 ${ignoredExtras} 列（疑似总分/名次/备注）`);
+  if (ignoredBefore) notes.push(`忽略姓名与成绩之间的 ${ignoredBefore} 列（疑似序号/学号）`);
+  if (filled) notes.push(`补全 ${filled} 行空班级（按上一行向下填充）`);
+  if (skipped) notes.push(`跳过 ${skipped} 行标题/汇总/说明行`);
+  if (blankRows) notes.push(`有 ${blankRows} 行存在空分（按缺考处理）`);
+  const missingYearRank = students.filter(s => s.yearRank == null).length;
+  if (opts.requireYearRank && missingYearRank) {
+    errors.push(yearRankIdx == null
+      ? `年级排名为必填：没有识别到名次列（缺 ${missingYearRank} 人）`
+      : `年级排名为必填：有 ${missingYearRank} 人未填写或填写无效`);
+  }
+  if (!students.length && !errors.length) errors.push('没有解析出学生，请检查内容和列顺序');
+  return { students, errors, notes, meta: {
+    mode: 'position', nameIdx, subjStart: bestStart, clsIdx, skipped, filledClass: filled,
+    yearRankColumn: yearRankIdx != null, missingYearRank, requireYearRank: !!opts.requireYearRank,
+  } };
+}
+
+function parseImport(text, opts) {
+  opts = opts || {};
+  const lines = splitImportLines(text);
+  if (!lines.length) return { students: [], errors: ['没有内容'], notes: [], meta: null };
+  let delim = detectDelimiter(lines);
+  let header = findHeader(lines, delim);
+  if (!header) {
+    for (const d of ['\t', ',', ';']) {
+      if (d === delim) continue;
+      const h = findHeader(lines, d);
+      if (h && (!header || h.score > header.score)) { header = h; delim = d; }
+    }
+  }
+  if (header) {
+    // 两行表头：科目行 + 原始分/赋分行
+    const mainCells = header.cells || splitImportLine(lines[header.index], delim);
+    const nextIdx = header.index + 1;
+    if (nextIdx < lines.length) {
+      const subCells = splitImportLine(lines[nextIdx], delim);
+      if (isSubHeaderCells(subCells)) {
+        const mergedCells = mergeHeaderCells(mainCells, subCells);
+        const merged = buildHeaderCandidate(mergedCells, header.index);
+        if (merged.hasName && merged.subjCount >= header.subjCount) {
+          merged.subRows = 1;
+          header = merged;
+        }
+      }
+    }
+    return parseHeaderTable(lines, delim, header, opts);
+  }
+  return parseNoHeaderTable(lines, delim, opts);
+}
+
+/* --- 各科评估 --- */
+function subjectEval(row, subj, schoolAvg, classAvg, classCount, history, examIdx) {
+  const score = row.subj[subj.key];
+  if (score == null) return null;
+  const rate = score / subj.max;
+  let level, levelCls;
+  if (rate >= 0.85) { level = '优秀'; levelCls = 'good'; }
+  else if (rate >= 0.70) { level = '良好'; levelCls = 'ok'; }
+  else if (rate >= 0.60) { level = '中等'; levelCls = 'warn'; }
+  else { level = '待提高'; levelCls = 'crit'; }
+  // 近三场趋势：保留缺考场次为空，只有最近两场连续有成绩才判断升降
+  const window = history.slice(Math.max(0, examIdx - 2), examIdx + 1);
+  while (window.length < 3) window.unshift(null);
+  const vals = window.map(r => r && r.subj ? r.subj[subj.key] : null);
+  let trend = null, trendDelta = null;
+  if (vals[1] != null && vals[2] != null) {
+    trendDelta = vals[2] - vals[1];
+    trend = trendDelta > 0 ? 'up' : (trendDelta < 0 ? 'down' : 'flat');
+  }
+  return {
+    score, rate, level, levelCls,
+    rank: row[subj.key + 'Rank'],
+    vsSchool: schoolAvg != null ? score - schoolAvg : null,
+    vsClass: classAvg != null ? score - classAvg : null,
+    trend, trendDelta, spark: vals,
+  };
+}
+
+/* --- 偏科 / 不匹配判定（双口径，两档：关注 / 预警） ---
+   口径说明（「不匹配」= 该科相对应有水平明显落后）：
+   1. 自身失衡【定档】：某科得分率 比 该生六科平均得分率 低多少。
+   2. 名单落后【佐证 / 排序】：该科 比名单均分低 / 排名落入后段。
+   为什么定档只看自身失衡：六科里「总有一科排在后段」是数学必然，
+   单独用排名会几乎人人误报；名单口径用来说明「落后是否也被榜单印证」，
+   并据此排优先级，不改变档位。
+   两档：
+   - 关注：自身失衡达 selfGap。
+   - 预警：自身失衡达 severeGap。
+   参数可在设置页调整。 */
+function mismatchSettings() {
+  const s = (data && data.settings && data.settings.mismatch) || {};
+  const d = DEFAULT_MISMATCH;
+  return {
+    selfGap: Number.isFinite(s.selfGap) ? s.selfGap : d.selfGap,
+    vsAvgGap: Number.isFinite(s.vsAvgGap) ? s.vsAvgGap : d.vsAvgGap,
+    rankTail: Number.isFinite(s.rankTail) ? s.rankTail : d.rankTail,
+    severeGap: Number.isFinite(s.severeGap) ? s.severeGap : d.severeGap,
+    minRanked: Number.isFinite(s.minRanked) ? s.minRanked : d.minRanked,
+  };
+}
+/* examIdx 取最近一场有成绩的考试；从 row.subj 取六科得分率。
+   subjAvgs: {chinese: 均分, ...}（本场名单该科均分），缺省时名单口径只按排名。 */
+function mismatchEval(row, examIdx, subjAvgs) {
+  if (!row || !row.subj) return null;
+  const cfg = mismatchSettings();
+  const ranks = [];
+  const rates = [];
+  for (const s of SUBJECTS) {
+    const v = row.subj[s.key];
+    if (v == null) continue;
+    const rank = row[s.key + 'Rank'];
+    const ranked = rank != null && Number.isFinite(rank);
+    if (ranked) ranks.push(rank);
+    const avg = subjAvgs && Number.isFinite(subjAvgs[s.key]) ? subjAvgs[s.key] : null;
+    rates.push({ key: s.key, name: s.name, score: v, max: s.max, rate: v / s.max, rank, ranked,
+      avgRate: avg != null ? avg / s.max : null });
+  }
+  if (rates.length < 2) return null;
+  const selfAvg = rates.reduce((a, x) => a + x.rate, 0) / rates.length;
+  const listTotal = ranks.length ? Math.max.apply(null, ranks) : null;
+  const useRank = listTotal != null && listTotal >= cfg.minRanked;
+  const subjects = rates.map(x => {
+    const selfGap = selfAvg - x.rate;                    // 正 = 低于自身平均
+    const vsAvgGap = x.avgRate != null ? x.avgRate - x.rate : null; // 正 = 低于名单均分
+    const tail = (useRank && x.ranked && x.rank <= listTotal) ? x.rank / listTotal : null;
+    const selfHit = selfGap >= cfg.selfGap;
+    const avgHit = vsAvgGap != null && vsAvgGap >= cfg.vsAvgGap;
+    const rankHit = tail != null && tail > (1 - cfg.rankTail);
+    // 名单口径 = 低于均分 或 排名后段；只作佐证与排序，不单独触发、不改档位
+    const listHit = avgHit || rankHit;
+    let level = 'ok';
+    if (selfHit) level = selfGap >= cfg.severeGap ? 'severe' : 'watch';
+    return { ...x, selfGap, vsAvgGap, tail, selfHit, avgHit, rankHit, listHit, level };
+  });
+  const flagged = subjects.filter(x => x.level !== 'ok').sort((a, b) => (b.selfGap + (b.vsAvgGap || 0)) - (a.selfGap + (a.vsAvgGap || 0)));
+  if (!flagged.length) return { level: 'ok', subjects, weakest: null, strongest: null, listTotal, selfAvg };
+  const worst = flagged[0];
+  const level = flagged.some(x => x.level === 'severe') ? 'severe' : 'watch';
+  const strongest = subjects.slice().sort((a, b) => b.rate - a.rate)[0];
+  return { level, subjects, weakest: worst, strongest, flagged, listTotal, selfAvg };
+}
+
+/* --- 复习建议（按得分率 + 趋势生成） --- */
+function buildAdvice(subj, ctx) {
+  // ctx: {rate, trend, trendDelta, vsSchool, score, schoolAvg, subjectName}
+  const weak = ctx.rate < 0.65, mid = ctx.rate >= 0.65 && ctx.rate < 0.80;
+  const down = ctx.trend === 'down';
+  const gap = ctx.vsSchool != null ? Math.round(Math.abs(ctx.vsSchool)) : null;
+  let core = '';
+  switch (subj.key) {
+    case 'chinese':
+      core = weak
+        ? '优先抓「性价比」：默写 64 篇篇目轮背（每天 15 分钟）、文言实词虚词过一遍课内清单，这两块最接近「背了就得分」。现代文阅读先固化答题模板（概括题、作用题、探究题各一套话术），作文准备 3 个可迁移素材。'
+        : mid
+          ? '阅读题的失分多半在「答题不全点」：对答案时数一数自己踩到几个得分点，补齐漏掉的角度。作文升格练「一材多用」，把现有素材写出层次。'
+          : '基础已稳，重点放在作文和阅读的「精准度」：研究近几次大考的评分细则，把丢掉的步骤分、要点分找回来。';
+      break;
+    case 'math':
+      core = weak
+        ? '先把选填的正确率打上来：每天 1 组限时选填（40 分钟内），目标正确率 80%。大题保住前 2 问的过程分——三角、数列、概率统计这三个板块相对好拿，优先练熟。'
+        : mid
+          ? '主攻两个「拉分大户」：解析几何与导数的第 2 问。每天 1 题大题精做（写出完整过程再对答案），同时保持选填手感不掉。'
+          : '目标是压轴题的步骤分与全卷零失误：每周 2 次全卷限时模拟，重点复盘「会做但做错」的题，这类分丢得最冤。';
+      break;
+    case 'english':
+      core = weak
+        ? '词汇是地基：3500 词按考频过，每天 30 词 + 当日复盘。语法填空专练高频考点（非谓语、定语从句、时态语态），每周 3 篇。'
+        : mid
+          ? '读后续写和应用文是主要增量：每周 2 篇限时写作，写完对照范文积累「动作链 + 情绪描写」语料。阅读理解注意定位原文，杜绝凭感觉选。'
+          : '保持手感的同时抠细节：完形的逻辑衔接词、语法填空的词形变化。作文冲高分靠高级句式和卷面，整理 10 个万能句式备用。';
+      break;
+    case 'physics':
+      core = weak
+        ? '力学和电学的「模型」先过关：受力分析、能量观点、带电粒子运动各画一张思维导图。大题写公式就有步骤分，别空着。实验题把课本原型实验的原理和误差分析吃透。'
+        : mid
+          ? '重点练「多过程分析」题：拆阶段、选规律、列方程三步走。电磁感应与带电粒子在复合场中的运动各总结一套切入套路。'
+          : '冲高分靠小题正确率和大题的严密表达：注意矢量方向、正负号、单位；每周一套限时训练保持状态。';
+      break;
+    case 'chem':
+      core = weak
+        ? '先背该背的：方程式（尤其课本实验相关）、元素化合物转化关系图。选择题的化学与生活、实验基础是快速提分点。'
+        : mid
+          ? '主攻工艺流程题：练「箭头式读流程」，标出每步目的；原理大题按「平衡—速率—图像」三件套答题，术语要准。'
+          : '实验综合与原理大题的规范表述是突破点：对照标准答案学「怎么答才给分」，注意控制变量、现象结论一一对应。';
+      break;
+    case 'geo':
+      core = weak
+        ? '区域定位和地图判读先过关：每张图问自己「在哪、什么特征、为什么」。自然地理的气候、地形成因背熟答题模板。'
+        : mid
+          ? '综合题失分多在「术语不专业、要点不全」：背熟常用答题术语（如「昼夜温差大—有利于养分积累」），对照答案补角度。'
+          : '冲击高分靠材料信息的提取和「地理过程」的逻辑链：练从材料里抠隐藏条件，答题按「因果链」展开。';
+      break;
+  }
+  if (down && ctx.trendDelta != null) {
+    core += `近两次下滑了 ${Math.abs(Math.round(ctx.trendDelta))} 分，先回看上次考试的丢分题，确认是知识点漏洞还是失误，再对症练。`;
+  } else if (ctx.trend === 'up' && ctx.trendDelta) {
+    core += `近两次在回升（+${Math.round(ctx.trendDelta)} 分），保持当前节奏。`;
+  }
+  if (gap != null && ctx.vsSchool != null && ctx.vsSchool < 0) {
+    core += `目前比本次名单均分低 ${gap} 分，先把这一截追平。`;
+  }
+  const priority = Math.round((1 - ctx.rate) * 100) + (down ? 25 : 0) + (ctx.vsSchool != null && ctx.vsSchool < 0 ? 10 : 0);
+  return { text: core, priority };
+}
+
+/* --- 学生简报 markdown（导出 / 发给 AI 的数据包） --- */
+function studentBriefMd(ctx) {
+  // ctx: {name, cls, examNames, rows, line1, line2, profile, subjEvals, ruleAdvice}
+  const L = [];
+  L.push('# 学生学业数据简报');
+  L.push('');
+  L.push(`- 学生：${ctx.name}${ctx.cls ? '（' + ctx.cls + '）' : ''}`);
+  if (ctx.profile && ctx.profile.goal) L.push(`- 目标：${ctx.profile.goal}`);
+  if (ctx.profile && ctx.profile.notes) L.push(`- 背景备注：${ctx.profile.notes}`);
+  L.push(`- 数据范围：${ctx.examNames.join('、')}（共 ${ctx.examNames.length} 次考试）`);
+  L.push(`- 分数线：本一线 ${ctx.line1} / 本二线 ${ctx.line2}`);
+  L.push(`- 总分口径：语数外（各 150）+ 物理（100）+ 化学、地理赋分（各 100），满分 750`);
+  L.push('- 年级排名：优先采用学校官方年排；没有年排的旧数据按导入名单计算');
+  L.push('- 单科名次、各科均分均以本次导入名单为范围，不代表全校');
+  L.push('');
+  L.push('## 历次成绩');
+  L.push('');
+  L.push('| 考试 | 语文 | 数学 | 英语 | 物理 | 化学(赋分) | 地理(赋分) | 总分 | 年级排名 | 班内排名 | 较上场 | 上线 |');
+  L.push('|---|---|---|---|---|---|---|---|---|---|---|---|');
+  ctx.rows.forEach((r, i) => {
+    if (!r) { L.push(`| ${ctx.examNames[i]} | — | — | — | — | — | — | — | — | — | 无记录 | — |`); return; }
+    const s = k => r.subj[k] == null ? '—' : r.subj[k];
+    const d = r.totalDelta == null ? '—' : (r.totalDelta > 0 ? '+' + r.totalDelta : String(r.totalDelta));
+    L.push(`| ${ctx.examNames[i]} | ${s('chinese')} | ${s('math')} | ${s('english')} | ${s('physics')} | ${s('chem')} | ${s('geo')} | ${r.total == null ? '—' : r.total} | ${r.totalRank == null ? '—' : r.totalRank} | ${r.classRank == null ? '—' : r.classRank} | ${d} | ${r.lineStatus || '—'} |`);
+  });
+  L.push('');
+  if (ctx.subjEvals && ctx.subjEvals.length) {
+    L.push('## 最近一次各科与本次名单均分对比');
+    L.push('');
+    L.push('| 科目 | 得分 | 满分 | 得分率 | 本次名单单科名次 | 名单均分 | 与名单均分差 | 近三次走势 |');
+    L.push('|---|---|---|---|---|---|---|---|');
+    for (const e of ctx.subjEvals) {
+      const trend = e.trendDelta == null ? '数据不连续' : (e.trendDelta > 0 ? '+' + e.trendDelta : String(e.trendDelta));
+      L.push(`| ${e.name} | ${e.score} | ${e.max} | ${Math.round(e.rate * 100)}% | ${e.rank == null ? '—' : e.rank} | ${e.schoolAvg == null ? '—' : Math.round(e.schoolAvg * 10) / 10} | ${e.vsSchool == null ? '—' : (e.vsSchool > 0 ? '+' : '') + Math.round(e.vsSchool * 10) / 10} | ${trend} |`);
+    }
+    L.push('');
+  }
+  if (ctx.mismatch && ctx.mismatch.level !== 'ok') {
+    const mm = ctx.mismatch;
+    L.push('## 偏科 / 不匹配（系统判定，供参考）');
+    L.push('');
+    L.push(`- 判定：${mm.level === 'severe' ? '● 预警（严重不匹配，建议优先介入）' : '⚠ 关注（明显偏科，建议谈话）'}`);
+    for (const x of mm.flagged) {
+      const parts = [`得分率 ${Math.round(x.rate * 100)}%`];
+      if (x.selfHit) parts.push(`比自身六科平均（${Math.round(mm.selfAvg * 100)}%）低 ${Math.round(x.selfGap * 100)}%`);
+      if (x.avgHit && x.vsAvgGap != null) parts.push(`比该科名单均分低 ${Math.round(x.vsAvgGap * 100)}%`);
+      if (x.rankHit) parts.push(`本次名单单科排名第 ${x.rank}，落入后 ${Math.round(x.tail * 100)}%`);
+      L.push(`- **${x.name}**：${parts.join('；')}`);
+    }
+    L.push('');
+  }
+  if (ctx.ruleAdvice && ctx.ruleAdvice.length) {
+    L.push('## 规则版复习建议（供参考，可修正）');
+    L.push('');
+    for (const a of ctx.ruleAdvice) L.push(`- **${a.name}**：${a.text}`);
+    L.push('');
+  }
+  return L.join('\n');
+}
+
+function buildAnalysisPrompt(briefMd) {
+  const system = '你是一位资深的高中学业分析师（熟悉江苏新高考 3+1+2、赋分制和备考策略）。' +
+    '你会收到一名学生的多次考试数据简报，要求基于简报里的真实数据做深度分析，' +
+    '禁止编造简报中不存在的信息（如具体题目、课堂表现等），不确定处明确说"需要老师补充观察"。' +
+    '输出使用简体中文，Markdown 格式，按以下结构：\n' +
+    '## 一、总体诊断（趋势与定位，2-4 句）\n' +
+    '## 二、单科深析（逐科：现状 → 最可能的原因假设 → 具体对策；问题科详写，优势科一两句带过）\n' +
+    '## 三、下阶段两周计划（可执行的清单，注明每项大概的时间投入）\n' +
+    '## 四、与学生/家长沟通要点（2-3 条，注意措辞，先肯定再指出问题）\n' +
+    '语气务实、像有经验的班主任给科任老师的建议，不要空话套话。';
+  const user = '请分析下面这份学生数据简报：\n\n' + briefMd;
+  return { system, user };
+}
+
+/*__CORE_END__*/
+
+/* ================================================================
+   调色板与图表（DOM 层）
+   ================================================================ */
+const PALETTES = {
+  light: {
+    series: ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300'],
+    surface: '#fcfcfb', ink: '#0b0b0b', ink2: '#52514e', muted: '#898781',
+    grid: '#e1e0d9', axis: '#c3c2b7', accent: '#2a78d6', accentSoft: '#cde2fb',
+    good: '#0ca30c', critical: '#d03b3b', warn: '#fab219', demph: '#c3c2b7',
+  },
+  dark: {
+    series: ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300'],
+    surface: '#1a1a19', ink: '#ffffff', ink2: '#c3c2b7', muted: '#898781',
+    grid: '#2c2c2a', axis: '#383835', accent: '#3987e5', accentSoft: '#184f95',
+    good: '#0ca30c', critical: '#d03b3b', warn: '#fab219', demph: '#383835',
+  },
+};
+function isDark() {
+  const t = document.documentElement.getAttribute('data-theme');
+  if (t === 'dark') return true;
+  if (t === 'light') return false;
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function P() { return isDark() ? PALETTES.dark : PALETTES.light; }
+function subjColor(key) { const s = SUBJECTS.find(x => x.key === key); return P().series[s ? s.ci : 0]; }
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function h(tag, attrs) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    const v = attrs[k];
+    if (v == null) continue;
+    if (k === 'class') e.className = v;
+    else if (k === 'text') e.textContent = v;
+    else if (k === 'html') e.innerHTML = v;
+    else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (let i = 2; i < arguments.length; i++) {
+    const c = arguments[i];
+    if (c == null) continue;
+    if (Array.isArray(c)) c.forEach(x => x != null && e.append(x));
+    else e.append(c.nodeType ? c : document.createTextNode(String(c)));
+  }
+  return e;
+}
+function fmt(v, d) { return v == null || isNaN(v) ? '—' : (d ? Number(v).toFixed(d) : String(Math.round(v * 10) / 10)); }
+function fmtSigned(v) { return v == null || isNaN(v) ? '—' : (v > 0 ? '+' + fmt(v) : fmt(v)); }
+function pct(v) { return v == null ? '—' : (v * 100).toFixed(1) + '%'; }
+
+async function copyText(t) {
+  try { await navigator.clipboard.writeText(t); return true; } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.append(ta); ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e2) { /* ignore */ }
+    ta.remove();
+    return ok;
+  }
+}
+
+function safeFileName(s) {
+  return String(s == null ? '' : s).replace(/[\\/:*?"<>|\r\n]+/g, '-').trim() || '成绩';
+}
+function downloadTextFile(filename, text, mime) {
+  const blob = new Blob([text], { type: mime || 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/* ---------- tooltip ---------- */
+const tt = document.getElementById('tt');
+function showTT(x, y, title, rows) {
+  tt.innerHTML = '';
+  tt.append(h('div', { class: 't', text: title }));
+  for (const r of rows) {
+    const row = h('div', { class: 'r' },
+      h('span', { class: 'key', style: 'border-top-color:' + r.color }),
+      h('span', { class: 'v', text: r.value }),
+      h('span', { class: 'n', text: r.name }));
+    tt.append(row);
+  }
+  tt.style.display = 'block';
+  const pad = 14, vw = window.innerWidth;
+  let left = x + pad, top = y + pad;
+  const rect = tt.getBoundingClientRect();
+  if (left + rect.width > vw - 8) left = x - rect.width - pad;
+  if (top + rect.height > window.innerHeight - 8) top = y - rect.height - pad;
+  tt.style.left = left + 'px'; tt.style.top = top + 'px';
+}
+function hideTT() { tt.style.display = 'none'; }
+
+/* ---------- 折线图 ---------- */
+function niceTicks(min, max, count) {
+  if (min === max) { min -= 1; max += 1; }
+  const span = max - min;
+  const step0 = span / Math.max(1, count - 1);
+  const mag = Math.pow(10, Math.floor(Math.log10(step0)));
+  const norm = step0 / mag;
+  const step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10) * mag;
+  const lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step;
+  const ticks = [];
+  for (let v = lo; v <= hi + step * 0.5; v += step) ticks.push(Math.round(v * 1e6) / 1e6);
+  return { lo, hi, ticks };
+}
+
+/**
+ * lineChartCard: 单卡折线图（含图例 + 表格视图切换 + 十字线 tooltip）
+ * opts: {title, sub, xLabels:[], series:[{key,name,color,values:[]}], refs:[{y,label,color}],
+ *        invertY, yUnit, height, labelLast}
+ */
+function lineChartCard(opts) {
+  const pal = P();
+  const off = new Set();
+  const W = 720, H = opts.height || 240;
+  const padL = 48, padR = (opts.refs && opts.refs.length) ? 92 : 56, padT = 14, padB = 30;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+
+  function visSeries() { return opts.series.filter(s => !off.has(s.key)); }
+
+  function domain() {
+    let vals = [];
+    for (const s of visSeries()) for (const v of s.values) if (v != null && !isNaN(v)) vals.push(v);
+    for (const r of (opts.refs || [])) if (r.y != null) vals.push(r.y);
+    if (!vals.length) return { lo: 0, hi: 1, ticks: [0, 1] };
+    let min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+    const pad = Math.max(1, (max - min) * 0.12);
+    return niceTicks(min - pad, max + pad, 5);
+  }
+
+  function build(onlyTable) {
+    const d = domain();
+    const n = opts.xLabels.length;
+    const X = i => n <= 1 ? padL + plotW / 2 : padL + plotW * i / (n - 1);
+    const Yraw = v => padT + plotH * (1 - (v - d.lo) / (d.hi - d.lo));
+    const Y = v => opts.invertY ? padT + plotH * (v - d.lo) / (d.hi - d.lo) : Yraw(v);
+    const wrap = h('div');
+    wrap.append(h('div', { class: 'chart-head' },
+      h('h3', { text: opts.title }),
+      opts.sub ? h('span', { class: 'cs', text: opts.sub }) : null,
+      h('span', { class: 'tw' },
+        h('button', { class: 'btn', onclick: () => { tblHidden = !tblHidden; rerender(); }, text: tblHidden ? '表格视图' : '返回图表' }))));
+
+    if (tblHidden) {
+      const tbl = h('table', { class: 'tb' });
+      const thead = h('thead', {}, h('tr', {}, h('th', { text: '考试' }),
+        visSeries().map(s => h('th', { text: s.name })),
+        (opts.refs || []).map(r => h('th', { text: r.label }))));
+      const tbody = h('tbody', {}, opts.xLabels.map((lb, i) => h('tr', {},
+        h('td', { text: lb }),
+        visSeries().map(s => h('td', { text: s.values[i] == null ? '—' : fmt(s.values[i]) })),
+        (opts.refs || []).map(() => h('td', { text: '—' })))));
+      tbl.append(thead, tbody);
+      wrap.append(h('div', { class: 'tscroll' }, tbl));
+      return wrap;
+    }
+    if (!visSeries().length || !n) { wrap.append(h('div', { class: 'empty', text: '暂无数据' })); return wrap; }
+
+    // SVG 字符串（静态颜色/数字，动态文本已转义）
+    let g = '';
+    for (const t of d.ticks) {
+      const y = Y(t);
+      g += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="${pal.grid}" stroke-width="1"/>`;
+      g += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="${pal.muted}" style="font-variant-numeric:tabular-nums">${t}</text>`;
+    }
+    g += `<line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="${pal.axis}" stroke-width="1"/>`;
+    for (let i = 0; i < n; i++) {
+      g += `<text x="${X(i)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="${pal.muted}">${esc(opts.xLabels[i])}</text>`;
+    }
+    // 参考线
+    for (const r of (opts.refs || [])) {
+      if (r.y == null) continue;
+      const y = Y(r.y);
+      if (y < padT - 2 || y > padT + plotH + 2) continue;
+      g += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="${r.color}" stroke-width="1.5" stroke-opacity="0.75"/>`;
+      g += `<text x="${W - padR + 6}" y="${y + 4}" font-size="11" fill="${pal.ink2}">${esc(r.label)}</text>`;
+    }
+    // 折线（缺值断开）
+    for (const s of visSeries()) {
+      let dstr = '', pen = false;
+      for (let i = 0; i < n; i++) {
+        const v = s.values[i];
+        if (v == null || isNaN(v)) { pen = false; continue; }
+        dstr += (pen ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1) + ' ';
+        pen = true;
+      }
+      g += `<path d="${dstr}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+      // 端点直标（仅单系列时）
+      if (opts.labelLast && visSeries().length === 1) {
+        for (let i = n - 1; i >= 0; i--) if (s.values[i] != null) {
+          g += `<circle cx="${X(i)}" cy="${Y(s.values[i])}" r="4.5" fill="${s.color}" stroke="${pal.surface}" stroke-width="2"/>`;
+          g += `<text x="${X(i) + 8}" y="${Y(s.values[i]) + 4}" font-size="12" font-weight="600" fill="${pal.ink}">${fmt(s.values[i])}</text>`;
+          break;
+        }
+      } else {
+        for (let i = 0; i < n; i++) if (s.values[i] != null)
+          g += `<circle cx="${X(i)}" cy="${Y(s.values[i])}" r="3.5" fill="${s.color}" stroke="${pal.surface}" stroke-width="2"/>`;
+      }
+    }
+    const svg =
+      `<svg class="line" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.title)}">` +
+      g +
+      `<line class="xh" x1="0" y1="${padT}" x2="0" y2="${padT + plotH}" stroke="${pal.axis}" stroke-width="1" opacity="0"/>` +
+      `<rect x="0" y="0" width="${W}" height="${H}" fill="transparent" style="cursor:crosshair"/>` +
+      `</svg>`;
+    const holder = h('div', { html: svg });
+    const svgEl = holder.firstChild;
+    // 十字线 + tooltip
+    const xh = svgEl.querySelector('.xh');
+    svgEl.addEventListener('pointermove', ev => {
+      const box = svgEl.getBoundingClientRect();
+      const px = (ev.clientX - box.left) * W / box.width;
+      let idx = n <= 1 ? 0 : Math.round((px - padL) / plotW * (n - 1));
+      idx = Math.max(0, Math.min(n - 1, idx));
+      xh.setAttribute('x1', X(idx)); xh.setAttribute('x2', X(idx)); xh.setAttribute('opacity', '0.8');
+      const rows = visSeries().map(s => ({
+        color: s.color, name: s.name, value: s.values[idx] == null ? '—' : fmt(s.values[idx]) + (opts.yUnit || ''),
+      }));
+      for (const r of (opts.refs || [])) rows.push({ color: r.color, name: r.label, value: fmt(r.y) + (opts.yUnit || '') });
+      showTT(ev.clientX, ev.clientY, opts.xLabels[idx], rows);
+    });
+    svgEl.addEventListener('pointerleave', () => { xh.setAttribute('opacity', '0'); hideTT(); });
+    wrap.append(holder);
+
+    // 图例（≥2 系列；点击可隐藏/显示）
+    if (opts.series.length >= 2) {
+      const lg = h('div', { class: 'legend' }, opts.series.map(s =>
+        h('span', {
+          class: 'li' + (off.has(s.key) ? ' off' : ''), role: 'button', tabindex: '0',
+          title: '点击显示/隐藏',
+          onclick: () => { off.has(s.key) ? off.delete(s.key) : off.add(s.key); rerender(); },
+          onkeydown: ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); off.has(s.key) ? off.delete(s.key) : off.add(s.key); rerender(); } },
+        },
+          h('span', { class: 'key', style: 'border-top-color:' + s.color }),
+          s.name)));
+      wrap.append(lg);
+    }
+    return wrap;
+  }
+
+  let tblHidden = false;
+  let cur = null;
+  function rerender() {
+    const next = build();
+    if (cur && cur.parentNode) cur.parentNode.replaceChild(next, cur);
+    cur = next;
+  }
+  cur = build();
+  const host = h('div', { class: 'card' }, cur);
+  return host;
+}
+
+/* ---------- 柱状图（单系列，名义类别 → 统一 slot1 色） ---------- */
+function barChartCard(opts) {
+  // opts: {title, sub, items:[{label, value, ref?}], yMax, unit, height}
+  const pal = P();
+  const W = 720, H = opts.height || 220;
+  const padL = 44, padR = 16, padT = 18, padB = 30;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const vals = opts.items.map(i => i.value).filter(v => v != null);
+  const maxV = opts.yMax != null ? opts.yMax : (vals.length ? Math.max.apply(null, vals) : 1);
+  const d = niceTicks(0, Math.max(maxV, 1), 5);
+  const n = opts.items.length;
+  const band = plotW / Math.max(1, n);
+  const barW = Math.min(24, band * 0.55);
+  const Y = v => padT + plotH * (1 - (v - d.lo) / (d.hi - d.lo));
+  let g = '';
+  for (const t of d.ticks) {
+    const y = Y(t);
+    g += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="${pal.grid}" stroke-width="1"/>`;
+    g += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="${pal.muted}">${t}</text>`;
+  }
+  g += `<line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="${pal.axis}" stroke-width="1"/>`;
+  const base = Y(d.lo);
+  opts.items.forEach((it, i) => {
+    const cx = padL + band * (i + 0.5);
+    if (it.value != null) {
+      const y = Y(it.value), hgt = Math.max(2, base - y);
+      const r = Math.min(4, barW / 2, hgt);
+      g += `<path d="M${cx - barW / 2} ${base} L${cx - barW / 2} ${y + r} Q${cx - barW / 2} ${y} ${cx - barW / 2 + r} ${y} L${cx + barW / 2 - r} ${y} Q${cx + barW / 2} ${y} ${cx + barW / 2} ${y + r} L${cx + barW / 2} ${base} Z" fill="${pal.accent}"/>`;
+      g += `<text x="${cx}" y="${y - 6}" text-anchor="middle" font-size="11" font-weight="600" fill="${pal.ink}">${fmt(it.value)}</text>`;
+    }
+    g += `<text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="11" fill="${pal.muted}">${esc(it.label)}</text>`;
+    g += `<rect x="${cx - band / 2}" y="${padT}" width="${band}" height="${plotH}" fill="transparent" data-i="${i}" style="cursor:default"/>`;
+  });
+  const holder = h('div', { html: `<svg class="bar" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.title)}">${g}</svg>` });
+  const svgEl = holder.firstChild;
+  svgEl.querySelectorAll('rect[data-i]').forEach(rc => {
+    rc.addEventListener('pointermove', ev => {
+      const it = opts.items[+rc.getAttribute('data-i')];
+      showTT(ev.clientX, ev.clientY, it.label, [{ color: pal.accent, name: opts.unit || '', value: it.value == null ? '—' : fmt(it.value) + (opts.valueSuffix || '') }]);
+    });
+    rc.addEventListener('pointerleave', hideTT);
+  });
+  // 表格孪生
+  let asTable = false, curEl = null;
+  const head = h('div', { class: 'chart-head' },
+    h('h3', { text: opts.title }),
+    opts.sub ? h('span', { class: 'cs', text: opts.sub }) : null,
+    h('span', { class: 'tw' }, h('button', {
+      class: 'btn', text: asTable ? '返回图表' : '表格视图',
+      onclick: () => { asTable = !asTable; rerenderBar(); },
+    })));
+  function rerenderBar() {
+    head.querySelector('.tw button').textContent = asTable ? '返回图表' : '表格视图';
+    const next = asTable
+      ? h('div', { class: 'tscroll' }, h('table', { class: 'tb' },
+        h('thead', {}, h('tr', {}, h('th', { text: '科目' }), h('th', { text: opts.unit || '均分' }))),
+        h('tbody', {}, opts.items.map(it => h('tr', {}, h('td', { text: it.label }), h('td', { text: it.value == null ? '—' : fmt(it.value) })))))
+      )
+      : holder;
+    if (curEl && curEl.parentNode) curEl.parentNode.replaceChild(next, curEl);
+    else if (curEl) head.parentNode.insertBefore(next, head.nextSibling);
+    curEl = next;
+  }
+  return h('div', { class: 'card' }, head, holder);
+}
+
+/* ---------- sparkline ---------- */
+function sparkline(values, color, invert) {
+  const pal = P();
+  const w = 84, hgt = 26, pad = 3;
+  const pts = values.filter(v => v != null);
+  if (pts.length < 2) return h('span', { class: 'hint', text: pts.length ? String(fmt(pts[0])) : '—' });
+  const min = Math.min.apply(null, pts), max = Math.max.apply(null, pts);
+  const span = max - min || 1;
+  const X = i => pad + (w - pad * 2) * i / (values.length - 1);
+  const Y = v => {
+    const t = (v - min) / span;
+    return invert ? pad + (hgt - pad * 2) * t : pad + (hgt - pad * 2) * (1 - t);
+  };
+  let dstr = '', pen = false, last = null;
+  values.forEach((v, i) => {
+    if (v == null) { pen = false; return; }
+    dstr += (pen ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1) + ' ';
+    pen = true; last = { x: X(i), y: Y(v) };
+  });
+  const svg = `<svg width="${w}" height="${hgt}" viewBox="0 0 ${w} ${hgt}" aria-hidden="true">
+    <path d="${dstr}" fill="none" stroke="${pal.demph}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${last ? `<circle cx="${last.x}" cy="${last.y}" r="2.6" fill="${color}" stroke="${pal.surface}" stroke-width="1.5"/>` : ''}
+  </svg>`;
+  return h('span', { html: svg });
+}
+
+/* ---------- 上线率 meter ---------- */
+function meterCard(label, rate, note) {
+  const wrap = h('div', { class: 'kpi' },
+    h('div', { class: 'lb', text: label }),
+    h('div', { class: 'vl', text: pct(rate) }),
+    h('div', { class: 'meter' }, h('i', { style: 'width:' + (rate == null ? 0 : Math.round(rate * 100)) + '%' })),
+    note ? h('div', { class: 'dt flat', text: note }) : null);
+  return wrap;
+}
+
+/* ================================================================
+   状态与持久化
+   ================================================================ */
+const LS_KEY = 'aki-grade-tracker-v1';
+const LS_THEME = 'aki-grade-tracker-theme';
+const LS_AI = 'aki-grade-tracker-ai';   // API 配置单独存，绝不进导出备份
+let data = null;      // {settings, exams, isSample, profiles}
+let aiCfg = null;     // {provider, base, model, key}
+let ui = { tab: 'overview', examIdx: 0, student: '', classFilter: '' };
+let aiOut = { name: '', text: '', running: false };
+let entryText = '';
+let entryPreview = null;
+let entryNotice = '';
+
+/* --- AI 服务商（实测过支持浏览器直连的预设） --- */
+const AI_PROVIDERS = {
+  deepseek: { name: 'DeepSeek', base: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
+  qwen: { name: '通义千问（阿里）', base: 'https://dashscope.aliyuncs.com/compatible-mode/v1', model: 'qwen-plus' },
+  kimi: { name: 'Kimi（月之暗面）', base: 'https://api.moonshot.cn/v1', model: 'moonshot-v1-32k' },
+  custom: { name: '自定义（OpenAI 兼容）', base: '', model: '' },
+};
+
+function loadAiCfg() {
+  try {
+    const raw = localStorage.getItem(LS_AI);
+    if (raw) {
+      const c = JSON.parse(raw);
+      if (c && typeof c === 'object') return { provider: c.provider || 'deepseek', base: c.base || '', model: c.model || '', key: c.key || '' };
+    }
+  } catch (e) { /* ignore */ }
+  const p = AI_PROVIDERS.deepseek;
+  return { provider: 'deepseek', base: p.base, model: p.model, key: '' };
+}
+function saveAiCfg() { try { localStorage.setItem(LS_AI, JSON.stringify(aiCfg)); } catch (e) { /* ignore */ } }
+
+/* --- 调用 OpenAI 兼容 API（流式） --- */
+async function callAI(cfg, messages, onDelta) {
+  const url = cfg.base.replace(/\/+$/, '') + '/chat/completions';
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key },
+    body: JSON.stringify({ model: cfg.model, messages, stream: true, temperature: 0.6 }),
+  });
+  if (!res.ok || !res.body) {
+    let detail = '';
+    try { detail = (await res.text()).slice(0, 300); } catch (e) { /* ignore */ }
+    const map = { 401: 'API Key 无效或已过期', 402: '账户余额不足', 403: '没有权限（模型名写错了？）', 429: '请求太频繁或欠费限流' };
+    throw new Error(`HTTP ${res.status}${map[res.status] ? '：' + map[res.status] : ''}${detail ? '｜' + detail : ''}`);
+  }
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let buf = '';
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    const lines = buf.split('\n');
+    buf = lines.pop();
+    for (const ln of lines) {
+      const m = ln.match(/^data:\s*(.+)$/);
+      if (!m) continue;
+      if (m[1].trim() === '[DONE]') return;
+      try {
+        const j = JSON.parse(m[1]);
+        const d = j.choices && j.choices[0] && j.choices[0].delta && j.choices[0].delta.content;
+        if (d) onDelta(d);
+      } catch (e) { /* 非 JSON 行忽略 */ }
+    }
+  }
+}
+async function testAiCfg(cfg) {
+  const url = cfg.base.replace(/\/+$/, '') + '/chat/completions';
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key },
+    body: JSON.stringify({ model: cfg.model, messages: [{ role: 'user', content: '回复"ok"两个字母即可' }], max_tokens: 8, stream: false }),
+  });
+  if (!res.ok) {
+    const map = { 401: 'API Key 无效或已过期', 402: '账户余额不足', 404: '接口地址或模型名不对', 429: '请求太频繁或欠费限流' };
+    throw new Error(`HTTP ${res.status}${map[res.status] ? '：' + map[res.status] : ''}`);
+  }
+  const j = await res.json();
+  return j.choices && j.choices[0] && j.choices[0].message ? j.choices[0].message.content : '';
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) {
+      const d = JSON.parse(raw);
+      if (d && Array.isArray(d.exams) && d.settings) {
+        d.isSample = !!d.isSample;
+        if (!d.profiles || typeof d.profiles !== 'object') d.profiles = {};
+        return d;
+      }
+    }
+  } catch (e) { /* fallthrough */ }
+  return { settings: defaultSettings(), exams: generateSample(), isSample: true, profiles: {} };
+}
+function saveData() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(data)); }
+  catch (e) { alert('保存失败：' + e.message); }
+}
+
+/* ================================================================
+   视图渲染
+   ================================================================ */
+const main = document.getElementById('main');
+
+/* 学生下拉显示稳定的「姓名（学号）」，内部只存身份 key */
+function studentOptions(exams) {
+  const byKey = new Map();
+  for (const ex of exams) {
+    for (const s of (Array.isArray(ex.students) ? ex.students : [])) {
+      const ident = studentIdentity(s), key = ident.key;
+      if (!byKey.has(key)) byKey.set(key, { key, name: ident.name, studentId: ident.studentId, cls: ident.cls });
+      else if (!byKey.get(key).studentId && ident.studentId) byKey.get(key).studentId = ident.studentId;
+    }
+  }
+  return Array.from(byKey.values()).sort((a, b) =>
+    (a.studentId || '').localeCompare(b.studentId || '', 'zh') || a.name.localeCompare(b.name, 'zh'));
+}
+function studentOptionLabel(o) {
+  return o.studentId ? `${o.name}（${o.studentId}）` : o.name;
+}
+function renderWarnings() {
+  const warnings = dataWarnings(data.exams, data.settings) || [];
+  const gradeWarn = (() => {
+    if (!data.exams.length) return null;
+    const all = computeAll(data);
+    const d = all[ui.examIdx] || all[0];
+    const g = d && d.stats && d.stats.gradeDiagnostics;
+    if (!g || !g.warning) return null;
+    const chem = g.chem, geo = g.geo;
+    const fmtBands = x => x.target.map((v, i) => `${x.actual[i].toFixed(1)}%/${v}%`).join('、');
+    return `本场赋分实际档位占比与设定偏差较大（化学：${fmtBands(chem)}；地理：${fmtBands(geo)}）。` +
+      '通常是同分边界或名单人数较少造成，建议导入学校官方赋分列后再据此解读总分。';
+  })();
+  if (gradeWarn) warnings.push(gradeWarn);
+  if (!warnings.length) return null;
+  return h('div', { class: 'cfg-warn' },
+    h('strong', { text: `数据口径提醒（${warnings.length} 条）` }),
+    h('ul', {}, warnings.slice(0, 8).map(t => h('li', { text: t }))),
+    warnings.length > 8 ? h('div', { text: `还有 ${warnings.length - 8} 条，请到「设置」检查配置或重新导入带学号的数据。` }) : null);
+}
+
+function render() {
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === ui.tab));
+  main.innerHTML = '';
+  if (data.exams.length) ui.examIdx = Math.max(0, Math.min(ui.examIdx, data.exams.length - 1));
+  const warn = renderWarnings();
+  if (warn) main.append(warn);
+  if (ui.tab === 'overview') renderOverview();
+  else if (ui.tab === 'student') renderStudent();
+  else if (ui.tab === 'entry') renderEntry();
+  else if (ui.tab === 'settings') renderSettings();
+  window.scrollTo({ top: 0 });
+}
+
+/* ---------- 总览 ---------- */
+function renderOverview() {
+  if (!data.exams.length) { main.append(h('div', { class: 'card' }, h('div', { class: 'empty', text: '还没有考试数据，先去「成绩录入」添加一场考试。' }))); return; }
+  const computed = computeAll(data);
+  const ei = ui.examIdx;
+  const cur = computed[ei], exam = data.exams[ei], st = cur.stats;
+  const prev = ei > 0 ? computed[ei - 1] : null;
+
+  // 考试切换
+  main.append(h('div', { class: 'card', style: 'margin-top:16px;padding:12px 14px' },
+    h('div', { class: 'row', style: 'align-items:center' },
+      h('span', { class: 'hint', text: '考试场次：' }),
+      h('div', { class: 'row', style: 'gap:8px' },
+        data.exams.map((ex, i) => h('button', {
+          class: 'chip' + (i === ei ? ' on' : ''), text: ex.name,
+          onclick: () => { ui.examIdx = i; render(); },
+        }))),
+      h('span', { class: 'hint', style: 'margin-left:auto', text: `本一线 ${st.line1} · 本二线 ${st.line2}` }))));
+
+  // 班级筛选
+  const classes = Array.from(new Set(cur.rows.map(r => r.cls).filter(Boolean))).sort();
+  if (classes.length > 1) {
+    main.append(h('div', { class: 'card', style: 'padding:10px 14px' },
+      h('div', { class: 'row', style: 'align-items:center;gap:8px' },
+        h('span', { class: 'hint', text: '班级：' }),
+        h('button', { class: 'chip' + (ui.classFilter === '' ? ' on' : ''), text: '全部', onclick: () => { ui.classFilter = ''; render(); } }),
+        classes.map(c => h('button', {
+          class: 'chip' + (ui.classFilter === c ? ' on' : ''), text: c,
+          onclick: () => { ui.classFilter = c; render(); },
+        })))));
+  }
+  const rows = ui.classFilter ? cur.rows.filter(r => r.cls === ui.classFilter) : cur.rows;
+  const listCount = rows.length;
+  const avg = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+  const withTotal = rows.filter(r => r.total != null);
+  const validCount = withTotal.length;
+  const avgTotal = avg(withTotal.map(r => r.total));
+  const l1c = withTotal.filter(r => r.total >= st.line1).length;
+  const l2c = withTotal.filter(r => r.total >= st.line2).length;
+  const matched = rows.filter(r => r.totalDelta != null);
+  const upRows = matched.filter(r => r.totalDelta > 0), downRows = matched.filter(r => r.totalDelta < 0);
+  // 只比较「同一筛选范围 + 同一批学生」，避免班级筛选或名单变化造成虚假涨跌
+  const prevById = new Map(prev ? prev.rows.filter(r => !ui.classFilter || r.cls === ui.classFilter).map(r => [r.id, r]) : []);
+  const comparable = withTotal.filter(r => prevById.has(r.id) && prevById.get(r.id).total != null);
+  const dtAvg = comparable.length
+    ? avg(comparable.map(r => r.total)) - avg(comparable.map(r => prevById.get(r.id).total)) : null;
+
+  // KPI 行
+  const kpis = h('div', { class: 'kpis' });
+  kpis.append(h('div', { class: 'kpi' }, h('div', { class: 'lb', text: '有效成绩人数' }), h('div', { class: 'vl', text: String(validCount) }),
+    h('div', { class: 'dt flat', text: `名单 ${listCount} 人 · ${ui.classFilter || '全部班级'}` })));
+  kpis.append(h('div', { class: 'kpi' }, h('div', { class: 'lb', text: '平均总分' }), h('div', { class: 'vl', text: fmt(avgTotal, 1) }),
+    h('div', { class: 'dt ' + (dtAvg == null ? 'flat' : dtAvg > 0 ? 'up' : dtAvg < 0 ? 'down' : 'flat'),
+      text: dtAvg == null ? (ei === 0 ? '首场考试' : '无同批学生可对比')
+        : (dtAvg > 0 ? '↑ ' : dtAvg < 0 ? '↓ ' : '') + `同 ${comparable.length} 人较上场 ` + fmtSigned(dtAvg) })));
+  kpis.append(meterCard('一本线上', validCount ? l1c / validCount : null, `${l1c} / ${validCount} 人`));
+  kpis.append(meterCard('二本及以上', validCount ? l2c / validCount : null, `${l2c} / ${validCount} 人`));
+  kpis.append(h('div', { class: 'kpi' }, h('div', { class: 'lb', text: '进步 / 退步' }),
+    h('div', { class: 'vl' }, h('span', { style: 'color:var(--good-text)', text: String(upRows.length) }), h('span', { class: 'hint', text: ' / ' }), h('span', { style: 'color:var(--critical)', text: String(downRows.length) })),
+    h('div', { class: 'dt flat', text: matched.length ? `共 ${matched.length} 人可对比` : '本场为首次考试' })));
+  main.append(kpis);
+
+  // 各科均分（仅本次筛选范围）
+  const subjItems = SUBJECTS.map(s => {
+    const vs = rows.map(r => r.subj[s.key]).filter(v => v != null);
+    return { label: s.name, value: avg(vs), ref: s.max };
+  });
+  main.append(barChartCard({ title: '各科平均分', sub: `本次筛选名单${ui.classFilter ? ' · ' + ui.classFilter : ''}（非全校）`, items: subjItems, unit: '均分' }));
+
+  // 名单两列
+  const topUp = upRows.slice().sort((a, b) => b.totalDelta - a.totalDelta).slice(0, 5);
+  const topDown = downRows.slice().sort((a, b) => a.totalDelta - b.totalDelta).slice(0, 5);
+  const nearLine = withTotal.filter(r => Math.abs(r.toLine1) <= 25).sort((a, b) => Math.abs(a.toLine1) - Math.abs(b.toLine1)).slice(0, 10);
+  const dec3 = rows.filter(r => continuousDecline(studentHistory(computed, r.id), 2));
+  // 偏科 / 不匹配名单：按严重度 + 最大拖累分排序，预警在前
+  const mmAll = [];
+  for (const r of rows) {
+    const mm = mismatchEval(r, ei, cur.stats.subjAvg);
+    if (mm && mm.level !== 'ok') mmAll.push({ r, mm });
+  }
+  mmAll.sort((a, b) => {
+    if (a.mm.level !== b.mm.level) return a.mm.level === 'severe' ? -1 : 1;
+    const score = m => (m.weakest ? m.weakest.selfGap + (m.weakest.vsAvgGap || 0) : 0);
+    return score(b.mm) - score(a.mm);
+  });
+
+  function mvList(title, sub, items, renderRow, emptyText) {
+    const ul = h('ul', { class: 'mv' });
+    if (!items.length) ul.append(h('li', {}, h('span', { class: 'meta', text: emptyText || '暂无' })));
+    else items.forEach(r => ul.append(renderRow(r)));
+    return h('div', { class: 'card' }, h('h2', { text: title }), h('p', { class: 'sub', text: sub }), ul);
+  }
+  const rowMv = (r, kind) => h('li', {},
+    h('span', { class: 'nm', text: r.name }),
+    r.studentId ? h('span', { class: 'meta', text: r.studentId }) : null,
+    h('span', { class: 'val' },
+      h('span', { style: 'color:' + (kind === 'up' ? 'var(--good-text)' : 'var(--critical)'), text: (kind === 'up' ? '↑ +' : '↓ ') + Math.abs(r.totalDelta) }),
+      h('span', { class: 'meta', text: ` 总分 ${fmt(r.total)}（年级 ${fmt(r.totalRank)}）` })));
+
+  const grid = h('div', { class: 'grid2' });
+  grid.append(mvList('进步最快', '总分较上场涨幅前 5', topUp, r => rowMv(r, 'up'), ei === 0 ? '首场考试，从下一场开始对比' : '暂无'));
+  grid.append(mvList('退步最多', '总分较上场跌幅前 5', topDown, r => rowMv(r, 'down'), ei === 0 ? '首场考试，从下一场开始对比' : '暂无'));
+  main.append(grid);
+
+  const grid2 = h('div', { class: 'grid2' });
+  grid2.append(mvList('一本临界生', `距本一线 ±25 分（线 ${st.line1}），适合重点谈话`, nearLine, r => h('li', {},
+    h('span', { class: 'nm', text: r.name }),
+    r.cls ? h('span', { class: 'meta', text: r.cls }) : null,
+    h('span', { class: 'val' },
+      h('span', { style: 'color:' + (r.toLine1 >= 0 ? 'var(--good-text)' : 'var(--critical)'), text: (r.toLine1 >= 0 ? '线上 +' : '线下 ') + fmt(Math.abs(r.toLine1)) + ' 分' }),
+      h('span', { class: 'meta', text: ` 总分 ${fmt(r.total)}` })))));
+  grid2.append(mvList('连续退步', '最近 3 场均有成绩且总分连降（缺考不判定），建议面谈', dec3, r => h('li', {},
+    h('span', { class: 'nm', text: r.name }),
+    r.cls ? h('span', { class: 'meta', text: r.cls }) : null,
+    h('span', { class: 'val' },
+      h('span', { style: 'color:var(--critical)', text: '↓ 连降' }),
+      h('span', { class: 'meta', text: ` 当前总分 ${fmt(r.total)}（年级 ${fmt(r.totalRank)}）` })))));
+  main.append(grid2);
+
+  // 偏科 / 不匹配名单（点击姓名跳到该生追踪页）
+  const mmList = mvList('偏科 / 不匹配名单', '按失衡幅度排序；● 预警优先介入，⚠ 关注建议谈话；带 * 表示该科在名单里也落后。点击姓名看详情', mmAll, ({ r, mm }) => h('li', {},
+    h('span', { class: 'nm', text: r.name, style: 'cursor:pointer;text-decoration:underline dotted', onclick: () => { ui.student = r.id; ui.tab = 'student'; render(); } }),
+    r.cls ? h('span', { class: 'meta', text: r.cls }) : null,
+    h('span', { class: 'val' },
+      h('span', { style: 'color:' + (mm.level === 'severe' ? 'var(--critical)' : '#d98a00'), text: mm.level === 'severe' ? '● 预警' : '⚠ 关注' }),
+      h('span', { class: 'meta', text: ` ${mm.flagged.map(x => x.name + (x.listHit ? '*' : '') + ' -' + Math.round(x.selfGap * 100) + '%').join('、')}` }))), '本名单暂无偏科/不匹配学生');
+  main.append(mmList);
+
+  // 完整成绩表（表格视图兜底）
+  const tbl = h('table', { class: 'tb' });
+  const headCells = ['学号', '姓名', '班级', ...SUBJECTS.map(s => s.name), '总分', '年排', '班内', '较上场', '上线'];
+  tbl.append(h('thead', {}, h('tr', {}, headCells.map(t => h('th', { text: t })))));
+  const sorted = rows.slice().sort((a, b) => (a.totalRank || 9999) - (b.totalRank || 9999));
+  tbl.append(h('tbody', {}, sorted.map(r => h('tr', {},
+    h('td', { text: r.studentId || '—' }), h('td', { text: r.name }), h('td', { text: r.cls || '—' }),
+    SUBJECTS.map(s => h('td', { text: r.subj[s.key] == null ? '—' : fmt(r.subj[s.key]) })),
+    h('td', { text: fmt(r.total) }),
+    h('td', { text: fmt(r.totalRank) }),
+    h('td', { text: fmt(r.classRank) }),
+    h('td', { class: r.trend || '', text: r.totalDelta == null ? '—' : (r.totalDelta > 0 ? '↑ +' + r.totalDelta : r.totalDelta < 0 ? '↓ ' + r.totalDelta : '持平') }),
+    h('td', { text: r.lineStatus || '—' })))));
+  main.append(h('div', { class: 'card' },
+    h('h2', { text: '成绩明细' }),
+    h('p', { class: 'sub', text: '化学、地理按赋分计入总分；上线率分母为有有效总分的人数。年排优先用学校官方年排；班内排名、单科名次和均分只覆盖本次导入名单。' }),
+    h('div', { class: 'tscroll' }, tbl)));
+}
+
+/* ---------- 学生追踪 ---------- */
+function renderStudent() {
+  const options = studentOptions(data.exams);
+  if (!options.length) { main.append(h('div', { class: 'card' }, h('div', { class: 'empty', text: '还没有学生数据。' }))); return; }
+  let curOpt = options.find(o => o.key === ui.student);
+  if (!curOpt) {
+    curOpt = options.find(o => o.name === ui.student) || options[0];
+    ui.student = curOpt.key;
+  }
+  const computed = computeAll(data);
+  const hist = studentHistory(computed, ui.student);
+  const latestIdx = (() => { for (let i = hist.length - 1; i >= 0; i--) if (hist[i]) return i; return -1; })();
+  const row = latestIdx >= 0 ? hist[latestIdx] : null;
+  const examNames = data.exams.map(e => e.name);
+
+  // 学生选择：下拉按学号/身份 key 定位，显示姓名（学号）
+  main.append(h('div', { class: 'card', style: 'margin-top:16px' },
+    h('div', { class: 'row', style: 'align-items:flex-end;gap:16px' },
+      h('label', { class: 'fld' }, '学生',
+        h('select', {
+          style: 'min-width:220px',
+          onchange: ev => { ui.student = ev.target.value; render(); },
+        }, options.map(o => h('option', { value: o.key, selected: o.key === ui.student ? '' : null }, studentOptionLabel(o))))),
+      row ? h('span', { class: 'tag', text: row.cls || '未分班' }) : null,
+      row ? h('span', { class: 'tag', text: row.studentId ? '学号 ' + row.studentId : '无学号（按班级姓名对齐）' }) : null,
+      row && latestIdx >= 0 ? h('span', { class: 'tag', text: data.exams[latestIdx].name }) : null,
+      row ? lineTag(row) : null)));
+
+  if (!row) { main.append(h('div', { class: 'card' }, h('div', { class: 'empty', text: '没有找到该学生的成绩。' }))); return; }
+
+  // KPI（一个 hero + 若干 stat）
+  const kpis = h('div', { class: 'kpis' });
+  kpis.append(h('div', { class: 'kpi hero' },
+    h('div', { class: 'lb', text: '最近总分' }),
+    h('div', { class: 'vl', text: fmt(row.total) }),
+    h('div', { class: 'dt ' + (row.trend === 'up' ? 'up' : row.trend === 'down' ? 'down' : 'flat'),
+      text: row.totalDelta == null ? '首次考试' : (row.totalDelta > 0 ? '↑ 较上场 +' + row.totalDelta : row.totalDelta < 0 ? '↓ 较上场 ' + row.totalDelta : '与上场持平') })));
+  kpis.append(h('div', { class: 'kpi' }, h('div', { class: 'lb', text: '年级排名' }), h('div', { class: 'vl', text: fmt(row.totalRank) }),
+    h('div', { class: 'dt ' + (row.rankDelta > 0 ? 'up' : row.rankDelta < 0 ? 'down' : 'flat'),
+      text: row.rankDelta == null ? (row.totalRank ? (row.hasOfficialRank ? '学校官方年排' : `名单内 ${computed[latestIdx].stats.validCount} 人有成绩`) : '—') : (row.rankDelta > 0 ? '↑ 升 ' + row.rankDelta + ' 名' : row.rankDelta < 0 ? '↓ 降 ' + Math.abs(row.rankDelta) + ' 名' : '名次不变') })));
+  kpis.append(h('div', { class: 'kpi' }, h('div', { class: 'lb', text: '班内排名' }), h('div', { class: 'vl', text: fmt(row.classRank) }), h('div', { class: 'dt flat', text: row.cls || '—' })));
+  kpis.append(h('div', { class: 'kpi' }, h('div', { class: 'lb', text: '上线情况' }),
+    h('div', { class: 'vl', style: 'font-size:18px;' + (row.lineStatus === '一本线上' ? 'color:var(--good-text)' : row.lineStatus === '未上线' ? 'color:var(--critical)' : ''), text: row.lineStatus || '—' }),
+    h('div', { class: 'dt flat', text: `距一本 ${fmtSigned(row.toLine1)} · 距二本 ${fmtSigned(row.toLine2)}` })));
+  main.append(kpis);
+
+  // 总分趋势（含两条线）
+  const stLast = computed[latestIdx].stats;
+  main.append(lineChartCard({
+    title: '总分趋势', sub: '满分 750，横线为本一线 / 本二线',
+    xLabels: examNames,
+    series: [{ key: 'total', name: '总分', color: P().accent, values: hist.map(r => r ? r.total : null) }],
+    refs: [
+      { y: stLast.line1, label: '本一线 ' + stLast.line1, color: P().good },
+      { y: stLast.line2, label: '本二线 ' + stLast.line2, color: P().warn },
+    ],
+    labelLast: true, height: 230,
+  }));
+
+  // 年级排名趋势（名次越小越好 → 反转轴）
+  main.append(lineChartCard({
+    title: '年级排名趋势', sub: '名次越靠上越好 · 优先使用学校官方年排',
+    xLabels: examNames,
+    series: [{ key: 'rank', name: '年级排名', color: P().accent, values: hist.map(r => r ? r.totalRank : null) }],
+    invertY: true, labelLast: true, height: 210, yUnit: ' 名',
+  }));
+
+  // 各科趋势（6 系列 + 图例开关）
+  main.append(lineChartCard({
+    title: '各科成绩趋势', sub: '化学、地理为赋分；点击图例可隐藏科目',
+    xLabels: examNames,
+    series: SUBJECTS.map(s => ({ key: s.key, name: s.name, color: subjColor(s.key), values: hist.map(r => r ? r.subj[s.key] : null) })),
+    height: 260,
+  }));
+
+  // 各科评估
+  const evals = [];
+  const grid = h('div', { class: 'subj-grid' });
+  for (const s of SUBJECTS) {
+    const cExam = computed[latestIdx];
+    const listAvg = cExam.stats.subjAvg[s.key];
+    const clsRows = row.cls ? cExam.rows.filter(r => r.cls === row.cls && r.subj[s.key] != null) : [];
+    const classAvg = clsRows.length ? clsRows.reduce((a, r) => a + r.subj[s.key], 0) / clsRows.length : null;
+    const ev = subjectEval(row, s, listAvg, classAvg, clsRows.length, hist, latestIdx);
+    if (!ev) { grid.append(h('div', { class: 'subj-card' }, h('div', { class: 'hd' }, h('span', { class: 'dot', style: 'background:' + subjColor(s.key) }), h('span', { class: 'nm', text: s.name })), h('div', { class: 'hint', text: '本场缺考/未录入' }))); continue; }
+    evals.push({ s, ev });
+    const bdCls = ev.levelCls === 'good' ? 'good' : ev.levelCls === 'crit' ? 'crit' : 'warn';
+    grid.append(h('div', { class: 'subj-card' },
+      h('div', { class: 'hd' },
+        h('span', { class: 'dot', style: 'background:' + subjColor(s.key) }),
+        h('span', { class: 'nm', text: s.name }),
+        h('span', { class: 'bd tag ' + bdCls, text: (ev.levelCls === 'good' ? '✓ ' : ev.levelCls === 'crit' ? '⚠ ' : '') + ev.level })),
+      h('div', { class: 'sc' }, fmt(ev.score), h('small', { text: ' / ' + s.max + (s.assigned ? '（赋分）' : '') })),
+      h('div', { class: 'meter' }, h('i', { style: 'width:' + Math.round(ev.rate * 100) + '%;background:' + subjColor(s.key) })),
+      h('dl', {},
+        h('dt', { text: '得分率' }), h('dd', { text: pct(ev.rate) }),
+        h('dt', { text: '名单单科名次' }), h('dd', { text: fmt(ev.rank) }),
+        h('dt', { text: '与名单均分比' }), h('dd', { style: ev.vsSchool != null && ev.vsSchool < 0 ? 'color:var(--critical)' : 'color:var(--good-text)', text: ev.vsSchool == null ? '—' : fmtSigned(Math.round(ev.vsSchool * 10) / 10) + ' 分' }),
+        h('dt', { text: '与班均比' }), h('dd', { text: ev.vsClass == null ? '—' : fmtSigned(Math.round(ev.vsClass * 10) / 10) }),
+        h('dt', { text: '近三次' }), h('dd', {}, ev.trendDelta == null ? h('span', { class: 'hint', text: '数据不连续' }) : sparkline(ev.spark, subjColor(s.key))))));
+  }
+  main.append(h('div', { class: 'card' }, h('h2', { text: '各科评估' }),
+    h('p', { class: 'sub', text: '均分与单科名次仅覆盖本次导入名单；缺考/间隔场次不做走势判断。按得分率分档：≥85% 优秀 · ≥70% 良好 · ≥60% 中等 · 其余待提高' }), grid));
+
+  // ---- 偏科 / 不匹配评估 ----
+  const subjAvgs = computed[latestIdx].stats.subjAvg;
+  const mm = mismatchEval(row, latestIdx, subjAvgs);
+  if (mm) {
+    const cfg = mismatchSettings();
+    const totalRanked = mm.listTotal || mm.subjects.filter(x => x.ranked).length;
+    const sub = `双口径判定：自身失衡决定档位——某科得分率比自身六科平均低 ≥${Math.round(cfg.selfGap * 100)}% 标「关注」，≥${Math.round(cfg.severeGap * 100)}% 标「预警」；名单口径（比该科均分低 ≥${Math.round(cfg.vsAvgGap * 100)}% 或排名落入后 ${Math.round(cfg.rankTail * 100)}%）作佐证并用于排序，不单独触发（名单不足 ${cfg.minRanked} 人不看排名）`;
+    let headTag = null;
+    if (mm.level === 'severe') headTag = h('span', { class: 'tag crit', text: '● 预警 · 严重不匹配，优先介入' });
+    else if (mm.level === 'watch') headTag = h('span', { class: 'tag warn', text: '⚠ 关注 · 明显偏科，建议谈话' });
+    else headTag = h('span', { class: 'tag good', text: '✓ 各科均衡' });
+    // 六科得分率横向条形（按与自身平均/名单均分差距着色）
+    const wrap = h('div', { style: 'display:flex;flex-direction:column;gap:6px;margin-top:10px' });
+    for (const x of mm.subjects.slice().sort((a, b) => b.rate - a.rate)) {
+      const bad = x.level === 'severe' ? 'var(--critical)' : x.level === 'watch' ? '#d98a00' : 'var(--good-text)';
+      const barColor = x.level === 'ok' ? subjColor(x.key) : bad;
+      const marks = [];
+      // 只有该科已被标记时才列佐证，避免「均衡」的学生满屏红字造成误读
+      if (x.level !== 'ok') {
+        if (x.selfHit) marks.push(`自身 -${Math.round(x.selfGap * 100)}%`);
+        if (x.avgHit) marks.push(x.vsAvgGap != null ? `均分 -${Math.round(x.vsAvgGap * 100)}%` : '低于均分');
+        if (x.rankHit) marks.push(`名单后 ${Math.round(x.tail * 100)}%`);
+      }
+      wrap.append(h('div', { style: 'display:flex;align-items:center;gap:10px' },
+        h('span', { style: 'width:36px;font-size:12px;color:var(--ink-2)', text: x.name }),
+        h('div', { class: 'meter', style: 'flex:1;margin:0' },
+          h('i', { style: 'width:' + Math.round(x.rate * 100) + '%;background:' + barColor })),
+        h('span', { style: 'width:44px;text-align:right;font-variant-numeric:tabular-nums;font-size:12px', text: pct(x.rate) }),
+        h('span', { style: 'width:64px;text-align:right;font-size:12px;color:var(--muted)', text: x.ranked ? `第 ${x.rank} / ${totalRanked}` : '无排名' }),
+        marks.length ? h('span', { style: 'font-size:12px;color:' + bad, text: marks.join(' · ') }) : null));
+    }
+    let noteHtml = null;
+    if (mm.level !== 'ok') {
+      const tips = [];
+      for (const x of mm.flagged) {
+        const parts = [`得分率 ${pct(x.rate)}`];
+        if (x.selfHit) parts.push(`比自身六科平均（${pct(mm.selfAvg)}）低 ${Math.round(x.selfGap * 100)}%`);
+        if (x.avgHit && x.vsAvgGap != null) parts.push(`比该科名单均分（${pct(x.avgRate)}）低 ${Math.round(x.vsAvgGap * 100)}%`);
+        if (x.rankHit) parts.push(`本次名单单科排名第 ${x.rank}（共 ${totalRanked} 人），落入后 ${Math.round(x.tail * 100)}%`);
+        tips.push(h('li', {}, h('strong', { text: x.name + '：' }), parts.join('；') + '。'));
+      }
+      noteHtml = h('div', { style: 'margin-top:10px' },
+        h('div', { style: 'font-size:13px;font-weight:650;margin-bottom:2px', text: mm.level === 'severe' ? '不匹配科目（优先介入）' : '不匹配科目（建议关注）' }),
+        h('ul', { style: 'margin:4px 0 0;padding-left:20px;color:var(--ink-2);font-size:13px;line-height:1.8' }, tips));
+    }
+    main.append(h('div', { class: 'card' },
+      h('h2', { text: '偏科 / 不匹配' }),
+      h('p', { class: 'sub', text: sub }),
+      h('div', { style: 'margin-bottom:6px' }, headTag),
+      wrap, noteHtml));
+  }
+
+  // 复习建议
+  const adviceItems = evals.map(({ s, ev }) => {
+    const a = buildAdvice(s, {
+      rate: ev.rate, trend: ev.trend, trendDelta: ev.trendDelta, vsSchool: ev.vsSchool,
+      score: ev.score, schoolAvg: computed[latestIdx].stats.subjAvg[s.key], subjectName: s.name,
+    });
+    return { s, ev, a };
+  }).sort((x, y) => y.a.priority - x.a.priority);
+  const ul = h('ul', { class: 'advice' });
+  for (const it of adviceItems) {
+    ul.append(h('li', {},
+      h('div', { class: 'ah' },
+        h('span', { class: 'dot', style: 'background:' + subjColor(it.s.key) }),
+        it.s.name,
+        h('span', { class: 'pr', text: `优先级：${it.ev.rate < 0.65 ? '高' : it.ev.rate < 0.80 ? '中' : '巩固'} · 得分率 ${pct(it.ev.rate)}` })),
+      h('p', { text: it.a.text })));
+  }
+  main.append(h('div', { class: 'card' }, h('h2', { text: '复习建议' }), h('p', { class: 'sub', text: '按提分空间自动排序，供谈话和作业布置参考' }), ul));
+
+  // ---- 背景档案 + AI 深度分析 ----
+  if (!data.profiles) data.profiles = {};
+  const profKey = row.studentId ? 'id:' + row.studentId : ui.student;
+  if (!data.profiles[profKey] && data.profiles[row.name]) data.profiles[profKey] = data.profiles[row.name];
+  const prof = data.profiles[profKey] || (data.profiles[profKey] = { goal: '', notes: '' });
+  main.append(h('div', { class: 'card' },
+    h('h2', { text: '背景档案' }),
+    h('p', { class: 'sub', text: '选填。写上目标和老师掌握的情况，AI 分析会结合这些信息，规则版建议不受影响。' }),
+    h('div', { class: 'entry-cols' },
+      h('label', { class: 'fld' }, '目标（如：冲一本 / 苏州大学 / 保二本）',
+        h('input', { type: 'text', value: prof.goal, placeholder: '选填', oninput: ev => { prof.goal = ev.target.value; saveData(); } })),
+      h('label', { class: 'fld' }, '背景备注（课堂状态、偏科原因、家庭期望等）',
+        h('textarea', { style: 'min-height:64px', placeholder: '选填', oninput: ev => { prof.notes = ev.target.value; saveData(); } }, prof.notes)))));
+
+  const briefCtx = {
+    name: row.name, cls: row.cls, examNames, rows: hist,
+    line1: computed[latestIdx].stats.line1, line2: computed[latestIdx].stats.line2,
+    profile: prof,
+    subjEvals: adviceItems.map(it => ({
+      name: it.s.name, score: it.ev.score, max: it.s.max, rate: it.ev.rate, rank: it.ev.rank,
+      schoolAvg: computed[latestIdx].stats.subjAvg[it.s.key], vsSchool: it.ev.vsSchool, trendDelta: it.ev.trendDelta,
+    })),
+    ruleAdvice: adviceItems.map(it => ({ name: it.s.name, text: it.a.text })),
+    mismatch: mm || null,
+  };
+  const briefMd = studentBriefMd(briefCtx);
+  const aiMsg = h('div', { class: 'msg' });
+  const aiText = h('div', {
+    style: 'white-space:pre-wrap;margin-top:10px;font-size:13px;line-height:1.75;color:var(--ink-2);' +
+      'max-height:520px;overflow:auto;border:1px solid var(--grid);border-radius:8px;padding:12px 14px;display:none',
+  });
+  if (aiOut.name === ui.student && aiOut.text) { aiText.style.display = 'block'; aiText.textContent = aiOut.text; }
+  const genBtn = h('button', {
+    class: 'btn primary', text: '生成 AI 深度分析',
+    onclick: async () => {
+      if (!aiCfg.key) { aiMsg.className = 'msg err'; aiMsg.textContent = '还没配置 API：请先到「设置」页选择服务商并填入 API Key。'; return; }
+      if (aiOut.running) return;
+      aiOut = { name: ui.student, text: '', running: true };
+      genBtn.disabled = true; genBtn.textContent = '分析中…';
+      aiMsg.className = 'msg'; aiMsg.textContent = '正在获取分析（流式输出，可能要几十秒）…';
+      aiText.style.display = 'block'; aiText.textContent = '';
+      try {
+        const msgs = buildAnalysisPrompt(briefMd);
+        await callAI(aiCfg, [{ role: 'system', content: msgs.system }, { role: 'user', content: msgs.user }], d => {
+          aiOut.text += d;
+          aiText.textContent = aiOut.text;
+          aiText.scrollTop = aiText.scrollHeight;
+        });
+        aiMsg.className = 'msg ok';
+        aiMsg.textContent = '完成。内容由 AI 生成，请老师把关后再用于谈话。';
+      } catch (e) {
+        aiMsg.className = 'msg err';
+        aiMsg.textContent = '生成失败：' + e.message + '。若是跨域/网络问题，可换一家服务商，或点「复制简报」自己贴给任意 AI。';
+      } finally {
+        aiOut.running = false; genBtn.disabled = false; genBtn.textContent = '生成 AI 深度分析';
+      }
+    },
+  });
+  main.append(h('div', { class: 'card' },
+    h('h2', { text: 'AI 深度分析' }),
+    h('p', { class: 'sub', text: '把该生全部数据 + 背景档案发给你在「设置」里配置的 AI，流式生成逐生定制的分析。费用由你的 API 账户承担，单次约几分钱。' }),
+    h('div', { class: 'row', style: 'gap:8px' },
+      genBtn,
+      h('button', {
+        class: 'btn', text: '复制简报',
+        onclick: async ev => { ev.target.textContent = (await copyText(briefMd)) ? '已复制 ✓' : '复制失败'; setTimeout(() => { ev.target.textContent = '复制简报'; }, 1500); },
+      }),
+      h('button', {
+        class: 'btn', text: '复制分析结果',
+        onclick: async ev => { ev.target.textContent = (await copyText(aiOut.text)) ? '已复制 ✓' : '先生成再复制'; setTimeout(() => { ev.target.textContent = '复制分析结果'; }, 1500); },
+      })),
+    aiMsg, aiText));
+
+  // 历次明细表
+  const tbl = h('table', { class: 'tb' });
+  tbl.append(h('thead', {}, h('tr', {}, ['考试', ...SUBJECTS.map(s => s.name), '总分', '年级', '班内', '较上场', '上线'].map(t => h('th', { text: t })))));
+  tbl.append(h('tbody', {}, hist.map((r, i) => {
+    if (!r) return h('tr', {}, h('td', { text: examNames[i] }), h('td', { colspan: 10, style: 'text-align:center;color:var(--muted)', text: '本场无记录' }));
+    return h('tr', {},
+      h('td', { text: examNames[i] }),
+      SUBJECTS.map(s => h('td', { text: r.subj[s.key] == null ? '—' : fmt(r.subj[s.key]) })),
+      h('td', { text: fmt(r.total) }), h('td', { text: fmt(r.totalRank) }), h('td', { text: fmt(r.classRank) }),
+      h('td', { class: r.trend || '', text: r.totalDelta == null ? '—' : (r.totalDelta > 0 ? '↑ +' + r.totalDelta : r.totalDelta < 0 ? '↓ ' + r.totalDelta : '持平') }),
+      h('td', { text: r.lineStatus || '—' }));
+  })));
+  main.append(h('div', { class: 'card' }, h('h2', { text: '历次明细' }), h('div', { class: 'tscroll' }, tbl)));
+}
+
+function renderImportPreview(exam) {
+  const pv = entryPreview;
+  if (!pv || pv.examIdx !== ui.examIdx) return null;
+  const blocked = !!pv.errors.length;
+  const wrap = h('div', { class: 'banner', id: 'importPreview', style: 'border-left-color:var(--accent);margin-top:14px' });
+
+  wrap.append(h('div', { style: 'display:flex;align-items:center;gap:8px;flex-wrap:wrap' },
+    h('strong', { text: '整理结果预览' }),
+    h('span', { class: 'tag good', text: `识别 ${pv.students.length} 人` }),
+    pv.meta && pv.meta.skipped ? h('span', { class: 'tag', text: `跳过 ${pv.meta.skipped} 行` }) : null,
+    pv.meta && pv.meta.filledClass ? h('span', { class: 'tag', text: `补班级 ${pv.meta.filledClass} 行` }) : null,
+    pv.meta && pv.meta.missingYearRank ? h('span', { class: 'tag crit', text: `缺年排 ${pv.meta.missingYearRank} 人` })
+      : (pv.meta && pv.meta.yearRankColumn ? h('span', { class: 'tag good', text: '官方年排已就绪' }) : null),
+    pv.errors.length ? h('span', { class: 'tag crit', text: `${pv.errors.length} 个必须修正` }) : h('span', { class: 'tag good', text: '校验通过' })));
+
+  if (pv.notes.length) {
+    wrap.append(h('ul', { style: 'margin:8px 0 0;padding-left:20px;color:var(--ink-2);font-size:12px;line-height:1.8' },
+      pv.notes.map(t => h('li', { text: t }))));
+  }
+
+  if (pv.errors.length) {
+    wrap.append(h('div', { class: 'banner crit', style: 'margin-top:10px' },
+      h('div', { style: 'font-weight:600', text: `必须修正（显示前 ${Math.min(10, pv.errors.length)} 条；导入已暂停）：` }),
+      h('ul', {}, pv.errors.slice(0, 10).map(t => h('li', { text: t }))),
+      pv.errors.length > 10 ? h('div', { class: 'hint', text: `还有 ${pv.errors.length - 10} 条，请修正源表后重新粘贴。` }) : null));
+  }
+
+  const cols = [
+    ['学号', 'studentId'], ['姓名', 'name'], ['班级', 'cls'], ['年排', 'yearRank'], ['语文', 'chinese'], ['数学', 'math'], ['英语', 'english'],
+    ['物理', 'physics'], ['化学', 'chem'], ['地理', 'geo'], ['化赋', 'chemScore'], ['地赋', 'geoScore'],
+  ];
+  const tbl = h('table', { class: 'tb' });
+  tbl.append(h('thead', {}, h('tr', {}, cols.map(c => h('th', { text: c[0] })))));
+  tbl.append(h('tbody', {}, pv.students.slice(0, 200).map(s => h('tr', {},
+    cols.map(([, key]) => h('td', { text: s[key] == null || s[key] === '' ? '—' : s[key] }))))));
+  wrap.append(h('div', { class: 'tscroll', style: 'margin-top:10px;max-height:320px' }, tbl));
+  if (pv.students.length > 200) wrap.append(h('p', { class: 'hint', text: `预览仅显示前 200 人，实际会导入全部 ${pv.students.length} 人。` }));
+
+  wrap.append(h('div', { class: 'row', style: 'margin-top:12px;gap:8px;align-items:center' },
+    h('button', {
+      class: 'btn primary',
+      text: blocked ? '修正错误后才能导入' : (pv.students.length ? `确认导入 ${pv.students.length} 人` : '没有可导入的学生'),
+      disabled: pv.students.length && !blocked ? null : '',
+      onclick: () => {
+        if (!pv.students.length || blocked) return;
+        if (exam.students.length && !confirm(`确认导入 ${pv.students.length} 人，覆盖原有 ${exam.students.length} 人？`)) return;
+        exam.students = pv.students.map(s => ({
+          studentId: s.studentId || '', name: s.name, cls: s.cls || '', yearRank: s.yearRank,
+          chinese: s.chinese, math: s.math, english: s.english,
+          physics: s.physics, chem: s.chem, geo: s.geo,
+          chemScore: s.chemScore, geoScore: s.geoScore,
+        }));
+        data.isSample = false;
+        entryNotice = `已导入 ${pv.students.length} 名学生到「${exam.name}」（年级排名采用学校官方年排）。`;
+        entryPreview = null;
+        entryText = '';
+        saveData();
+        render();
+      },
+    }),
+    h('button', { class: 'btn', text: '取消', onclick: () => { entryPreview = null; render(); } }),
+    blocked
+      ? h('span', { class: 'hint', style: 'color:var(--critical)', text: '错误已拦截：修正源表后重新粘贴并预览。' })
+      : h('span', { class: 'hint', text: '跨场追踪优先按学号；无学号时按「班级 + 姓名」对齐。' })));
+  return wrap;
+}
+
+function lineTag(r) {
+  if (!r.lineStatus) return null;
+  const cls = r.lineStatus === '一本线上' ? 'good' : r.lineStatus === '未上线' ? 'crit' : '';
+  return h('span', { class: 'tag ' + cls, text: (r.lineStatus === '一本线上' ? '✓ ' : r.lineStatus === '未上线' ? '⚠ ' : '') + r.lineStatus });
+}
+
+/* ---------- 录入 ---------- */
+function renderEntry() {
+  if (entryPreview && entryPreview.examIdx !== ui.examIdx) { entryPreview = null; entryText = ''; }
+  if (data.isSample) {
+    main.append(h('div', { class: 'banner' },
+      h('div', { text: '当前显示的是示例数据（44 名虚拟学生 × 3 次考试），用来演示功能。' }),
+      h('div', { class: 'row', style: 'margin-top:8px' },
+        h('button', {
+          class: 'btn primary', text: '清空示例，开始录入',
+          onclick: () => { if (confirm('清空全部示例数据，创建一场空考试？')) { data = { settings: data.settings, exams: [{ name: '考试1', line1: data.settings.line1, line2: data.settings.line2, students: [] }], isSample: false, profiles: {} }; saveData(); ui.examIdx = 0; render(); } },
+        }),
+        h('span', { class: 'hint', style: 'align-self:center', text: '或先在下面试试导入自己的表格' }))));
+  }
+
+  // 考试管理
+  main.append(h('div', { class: 'card' },
+    h('h2', { text: '考试场次' }),
+    h('p', { class: 'sub', text: '点击切换要编辑的场次；名称可直接改，其他视图会跟着变。' }),
+    h('div', { class: 'row', style: 'gap:8px;align-items:center' },
+      data.exams.map((ex, i) => h('button', {
+        class: 'chip' + (i === ui.examIdx ? ' on' : ''), text: ex.name,
+        onclick: () => { ui.examIdx = i; entryText = ''; entryPreview = null; entryNotice = ''; render(); },
+      })),
+      h('button', {
+        class: 'btn', text: '＋ 新建考试',
+        onclick: () => { data.exams.push({ name: '考试' + (data.exams.length + 1), line1: data.settings.line1, line2: data.settings.line2, students: [] }); data.isSample = false; ui.examIdx = data.exams.length - 1; entryText = ''; entryPreview = null; entryNotice = ''; saveData(); render(); },
+      }))));
+
+  const exam = data.exams[ui.examIdx];
+  if (!exam) return;
+
+  // 基本信息
+  main.append(h('div', { class: 'card' },
+    h('h2', { text: '本场设置' }),
+    h('div', { class: 'entry-cols', style: 'margin-top:10px' },
+      h('label', { class: 'fld' }, '考试名称',
+        h('input', { type: 'text', value: exam.name, oninput: ev => { exam.name = ev.target.value; data.isSample = false; saveData(); } })),
+      h('label', { class: 'fld' }, '本一线（0–750）',
+        h('input', { type: 'number', min: '0', max: '750', value: exam.line1 == null ? data.settings.line1 : exam.line1, oninput: ev => { exam.line1 = ev.target.value === '' ? null : Number(ev.target.value); saveData(); } })),
+      h('label', { class: 'fld' }, '本二线（0–750）',
+        h('input', { type: 'number', min: '0', max: '750', value: exam.line2 == null ? data.settings.line2 : exam.line2, oninput: ev => { exam.line2 = ev.target.value === '' ? null : Number(ev.target.value); saveData(); } })),
+      h('div', { class: 'row', style: 'align-items:flex-end;gap:8px' },
+        h('button', {
+          class: 'btn danger', text: '删除本场',
+          onclick: () => {
+            if (!confirm(`删除「${exam.name}」及其 ${exam.students.length} 条成绩？`)) return;
+            data.exams.splice(ui.examIdx, 1); ui.examIdx = Math.max(0, ui.examIdx - 1);
+            entryText = ''; entryPreview = null; entryNotice = '';
+            saveData(); render();
+          },
+        })))));
+
+  // 粘贴导入
+  const previewHost = h('div');
+  const msg = h('div', { class: 'msg' });
+  const ta = h('textarea', {
+    class: 'paste',
+    placeholder: '从 Excel / WPS 直接复制粘贴，格式不用统一。\n支持：标题行、有/无表头、序号/学号/总分等多余列、汇总行、空班级、全角数字、缺考。\n推荐列：学号（重名时必填） 姓名 班级 年级排名（必填） 语文 数学 英语 物理 化学 地理 [化学赋分 地理赋分]\n越界分数、重复身份、缺年排会拦截导入；整理完先显示预览，确认后再覆盖本场。',
+  }, entryText);
+  ta.addEventListener('input', () => {
+    entryText = ta.value;
+    entryNotice = '';
+    msg.className = 'msg';
+    msg.textContent = '';
+    if (entryPreview) { entryPreview = null; previewHost.innerHTML = ''; }
+  });
+
+  function rosterForTemplate() {
+    const take = ex => ex.students.map(s => ({ studentId: s.studentId || '', name: s.name, cls: s.cls || '' }));
+    if (exam.students.length) return take(exam);
+    for (let i = ui.examIdx - 1; i >= 0; i--) if (data.exams[i].students.length) return take(data.exams[i]);
+    for (let i = ui.examIdx + 1; i < data.exams.length; i++) if (data.exams[i].students.length) return take(data.exams[i]);
+    return [];
+  }
+  function downloadTemplate(withRoster) {
+    const roster = withRoster ? rosterForTemplate() : [];
+    const csv = buildTemplateCsv(roster);
+    const tag = withRoster && roster.length ? '-名单' : '-空白';
+    downloadTextFile(`成绩导入模板-${safeFileName(exam.name)}${tag}.csv`, csv);
+    if (withRoster && !roster.length) {
+      msg.className = 'msg err';
+      msg.textContent = '还没有可用名单，已改为下载空白模板。';
+    } else {
+      msg.className = 'msg ok';
+      msg.textContent = withRoster
+        ? `已下载名单模板（${roster.length} 人）。请保留学号并填好分数和年级排名，整表复制粘贴回来即可。`
+        : '已下载空白模板。请填学号、分数和年级排名，整表复制粘贴回来即可。';
+    }
+  }
+
+  main.append(h('div', { class: 'card' },
+    h('h2', { text: '导入成绩' }),
+    h('p', { class: 'sub', text: `导入会替换「${exam.name}」的全部学生。老师给的表格式再乱也不用先改：系统会先自动整理并校验。年级排名必填；学号推荐必填，可区分重名并稳定跨场追踪；越界分数和重复身份会拦截。` }),
+    entryNotice ? h('div', { class: 'msg ok', text: entryNotice }) : null,
+    h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap;margin-bottom:10px' },
+      h('button', { class: 'btn', text: '⬇ 下载空白模板', onclick: () => downloadTemplate(false) }),
+      h('button', { class: 'btn', text: '⬇ 下载名单模板', onclick: () => downloadTemplate(true) }),
+      h('span', { class: 'hint', style: 'align-self:center', text: 'CSV 格式，用 Excel / WPS 打开；学号和年级排名请勿删列' })),
+    ta,
+    h('div', { class: 'row', style: 'margin-top:10px;gap:8px' },
+      h('button', {
+        class: 'btn primary', text: '自动整理并预览',
+        onclick: () => {
+          if (!entryText.trim()) {
+            msg.className = 'msg err';
+            msg.textContent = '请先粘贴成绩内容，或下载模板填写后粘贴回来。';
+            return;
+          }
+          entryNotice = '';
+          const res = parseImport(entryText, { requireYearRank: true });
+          entryPreview = Object.assign({ examIdx: ui.examIdx }, res);
+          render();
+          setTimeout(() => {
+            const el = document.getElementById('importPreview');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 60);
+        },
+      }),
+      h('button', {
+        class: 'btn', text: '清空本场学生',
+        onclick: () => { if (confirm('清空本场全部学生？')) { exam.students = []; data.isSample = false; entryPreview = null; entryNotice = ''; saveData(); render(); } },
+      }),
+      h('span', { class: 'hint', style: 'align-self:center' }, `当前本场 ${exam.students.length} 人`)),
+    msg,
+    previewHost));
+  if (entryPreview && entryPreview.examIdx === ui.examIdx) previewHost.append(renderImportPreview(exam));
+
+  // 当前学生列表（可单条删除）
+  if (exam.students.length) {
+    const tbl = h('table', { class: 'tb' });
+    tbl.append(h('thead', {}, h('tr', {}, ['学号', '姓名', '班级', '年排', '语文', '数学', '英语', '物理', '化学', '地理', '化赋', '地赋', ''].map(t => h('th', { text: t })))));
+    tbl.append(h('tbody', {}, exam.students.slice(0, 50).map((s, i) => h('tr', {},
+      h('td', { text: s.studentId || '—' }), h('td', { text: s.name }), h('td', { text: s.cls || '—' }), h('td', { text: s.yearRank == null ? '—' : s.yearRank }),
+      ['chinese', 'math', 'english', 'physics', 'chem', 'geo', 'chemScore', 'geoScore'].map(k => h('td', { text: s[k] == null ? '—' : s[k] })),
+      h('td', {}, h('button', {
+        class: 'btn danger', text: '删', style: 'padding:2px 8px;font-size:12px',
+        onclick: () => { exam.students.splice(i, 1); data.isSample = false; saveData(); render(); },
+      }))))));
+    main.append(h('div', { class: 'card' },
+      h('h2', { text: '学生列表' }),
+      h('p', { class: 'sub', text: exam.students.length > 50 ? `共 ${exam.students.length} 人，仅显示前 50（完整数据已在计算中生效）` : `共 ${exam.students.length} 人` }),
+      h('div', { class: 'tscroll' }, tbl)));
+  }
+
+  // 备份
+  main.append(h('div', { class: 'card' },
+    h('h2', { text: '数据备份' }),
+    h('p', { class: 'sub', text: '数据只存在本机浏览器里。换电脑、清缓存前先导出；导入会覆盖当前全部数据。' }),
+    h('div', { class: 'row', style: 'gap:8px' },
+      h('button', {
+        class: 'btn', text: '导出本场成绩 CSV',
+        onclick: () => {
+          if (!exam.students.length) { alert('本场还没有学生成绩。'); return; }
+          const prevExam = ui.examIdx > 0 ? data.exams[ui.examIdx - 1] : null;
+          const computed = computeExamData(exam, data.settings, prevExam);
+          downloadTextFile(`成绩表-${safeFileName(exam.name)}.csv`, buildGradesExportCsv(computed.rows));
+        },
+      }),
+      h('button', {
+        class: 'btn', text: '导出 JSON',
+        onclick: () => {
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = '成绩数据备份.json';
+          a.click();
+          URL.revokeObjectURL(a.href);
+        },
+      }),
+      (() => {
+        const fi = h('input', { type: 'file', accept: '.json', style: 'display:none', onchange: ev => {
+          const f = ev.target.files[0]; if (!f) return;
+          const rd = new FileReader();
+          rd.onload = () => {
+            try {
+              const d = JSON.parse(rd.result);
+              if (!d || !Array.isArray(d.exams) || !d.settings) throw new Error('格式不对');
+              if (!confirm(`导入备份（${d.exams.length} 场考试）？当前数据将被覆盖。`)) return;
+              d.isSample = false; data = d; saveData(); ui.examIdx = 0; render();
+            } catch (e) { alert('导入失败：' + e.message); }
+          };
+          rd.readAsText(f);
+        } });
+        return h('span', {}, h('button', { class: 'btn', text: '导入 JSON', onclick: () => fi.click() }), fi);
+      })(),
+      h('button', {
+        class: 'btn', text: '重载示例数据',
+        onclick: () => { if (confirm('用示例数据覆盖当前全部内容？')) { data = { settings: defaultSettings(), exams: generateSample(), isSample: true, profiles: {} }; saveData(); ui.examIdx = 0; ui.student = ''; render(); } },
+      }))));
+  const backupWarnings = dataWarnings(data.exams, data.settings);
+  if (backupWarnings.length) {
+    main.append(h('div', { class: 'card' },
+      h('h2', { text: '导出前请核对' }),
+      h('p', { class: 'sub', text: '下列问题会影响分数、赋分或跨场追踪口径，建议修正后再备份：' }),
+      h('ul', { style: 'margin:8px 0 0;padding-left:20px;color:var(--ink-2);font-size:13px;line-height:1.8' },
+        backupWarnings.slice(0, 12).map(t => h('li', { text: t })))));
+  }
+}
+
+/* ---------- 设置 ---------- */
+function renderSettings() {
+  const b = data.settings.bands;
+  const settingErrors = validateSettings(data.settings);
+  const cfgWarn = settingErrors.length
+    ? h('div', { class: 'cfg-warn', style: 'margin-top:12px' },
+      h('strong', { text: '当前设置不合规，计算已临时使用安全默认值：' }),
+      h('ul', {}, settingErrors.map(t => h('li', { text: t }))))
+    : null;
+  main.append(h('div', { class: 'card' },
+    h('h2', { text: '等级赋分规则' }),
+    h('p', { class: 'sub', text: '默认为辽宁 / 八省联考式 5 档（A15% B35% C35% D13% E2%）。江苏 3+1+2 同比例；如学校口径不同，改这里后全表自动重算。档内按线性插值，赋分取整。' }),
+    (() => {
+      const tbl = h('table', { class: 'tb set-tbl' });
+      tbl.append(h('thead', {}, h('tr', {}, ['等级', '比例 %', '赋分下限', '赋分上限'].map(t => h('th', { text: t })))));
+      tbl.append(h('tbody', {}, b.map((band, i) => h('tr', {},
+        h('td', { text: band.name }),
+        h('td', {}, h('input', { type: 'number', value: band.pct, min: '0', max: '100', oninput: ev => { band.pct = Number(ev.target.value) || 0; saveData(); } })),
+        h('td', {}, h('input', { type: 'number', value: band.min, min: '0', max: '100', oninput: ev => { band.min = Number(ev.target.value); saveData(); } })),
+        h('td', {}, h('input', { type: 'number', value: band.max, min: '0', max: '100', oninput: ev => { band.max = Number(ev.target.value); saveData(); } }))))));
+      const sum = b.reduce((a, x) => a + (Number(x.pct) || 0), 0);
+      return h('div', {}, h('div', { class: 'tscroll' }, tbl),
+        h('p', { class: 'hint', style: 'margin:8px 0 0', text: '比例合计：' + sum + '%' + (Math.abs(sum - 100) > 0.01 ? '（不符合规则，计算已用默认档位）' : ' ✓') }));
+    })(),
+    cfgWarn));
+
+  main.append(h('div', { class: 'card' },
+    h('h2', { text: '默认分数线' }),
+    h('p', { class: 'sub', text: '新建考试时自动带入；每场考试可在「成绩录入」里单独改。本二线必须低于本一线。' }),
+    h('div', { class: 'entry-cols' },
+      h('label', { class: 'fld' }, '本一线（0–750）', h('input', { type: 'number', min: '0', max: '750', value: data.settings.line1, oninput: ev => { data.settings.line1 = Number(ev.target.value) || 0; saveData(); } })),
+      h('label', { class: 'fld' }, '本二线（0–750）', h('input', { type: 'number', min: '0', max: '750', value: data.settings.line2, oninput: ev => { data.settings.line2 = Number(ev.target.value) || 0; saveData(); } })))));
+
+  // 偏科 / 不匹配判定阈值
+  if (!data.settings.mismatch || typeof data.settings.mismatch !== 'object') data.settings.mismatch = { ...DEFAULT_MISMATCH };
+  const mmCfg = data.settings.mismatch;
+  // 比例类字段存小数，界面按百分数显示；人数类字段原样存
+  const mmField = (key, label, hint) => h('label', { class: 'fld' }, label,
+    h('input', { type: 'number', min: '0', max: '100', value: Math.round((Number.isFinite(mmCfg[key]) ? mmCfg[key] : DEFAULT_MISMATCH[key]) * 100), oninput: ev => {
+      const v = Number(ev.target.value);
+      mmCfg[key] = (Number.isFinite(v) && v >= 0 && v <= 100) ? v / 100 : DEFAULT_MISMATCH[key];
+      saveData();
+    } }),
+    hint ? h('span', { class: 'hint', text: hint }) : null);
+  const mmCountField = (key, label, hint) => h('label', { class: 'fld' }, label,
+    h('input', { type: 'number', min: '2', max: '200', value: Number.isFinite(mmCfg[key]) ? mmCfg[key] : DEFAULT_MISMATCH[key], oninput: ev => {
+      const v = Number(ev.target.value);
+      mmCfg[key] = (Number.isFinite(v) && v >= 2 && v <= 200) ? Math.round(v) : DEFAULT_MISMATCH[key];
+      saveData();
+    } }),
+    hint ? h('span', { class: 'hint', text: hint }) : null);
+  main.append(h('div', { class: 'card' },
+    h('h2', { text: '偏科 / 不匹配判定' }),
+    h('p', { class: 'sub', text: '双口径判定：自身失衡决定档位（六科里总有一科排名靠后，所以排名不能单独触发）；名单口径（低于该科均分 / 排名后段）只作佐证并用于排序。自身失衡达标标「关注」，失衡特别严重标「预警」。改这里后学生页和总览名单自动重算。' }),
+    h('div', { class: 'entry-cols', style: 'margin-top:10px' },
+      mmField('selfGap', '关注 · 自身失衡阈值（%）', '默认 15，即某科比自身六科平均低 15 个百分点'),
+      mmField('severeGap', '预警 · 严重失衡阈值（%）', '默认 22，达到即预警'),
+      mmField('vsAvgGap', '佐证 · 低于名单均分阈值（%）', '默认 10，即某科比该科名单均分低 10 个百分点'),
+      mmField('rankTail', '佐证 · 排名后段阈值（%）', '默认 30，即单科排名落入名单后 30%'),
+      mmCountField('minRanked', '启用排名口径的最少人数', '默认 5；名单不足该人数时只看得分率，避免小样本误判'))));
+
+  // AI 深度分析配置
+  const aiMsg = h('div', { class: 'msg' });
+  const baseIn = h('input', { type: 'text', value: aiCfg.base, placeholder: 'https://…/v1', oninput: ev => { aiCfg.base = ev.target.value.trim(); saveAiCfg(); } });
+  const modelIn = h('input', { type: 'text', value: aiCfg.model, placeholder: '模型名', oninput: ev => { aiCfg.model = ev.target.value.trim(); saveAiCfg(); } });
+  main.append(h('div', { class: 'card' },
+    h('h2', { text: 'AI 深度分析（学生页使用）' }),
+    h('p', { class: 'sub', text: 'API Key 由老师自己填写，只保存在这台电脑的浏览器里，不会出现在导出的 JSON 备份中。建议在服务商后台建一个设了消费限额的子 key。' }),
+    h('div', { class: 'entry-cols', style: 'margin-top:10px' },
+      h('label', { class: 'fld' }, '服务商',
+        h('select', {
+          onchange: ev => {
+            aiCfg.provider = ev.target.value;
+            const p = AI_PROVIDERS[aiCfg.provider];
+            if (p && aiCfg.provider !== 'custom') { aiCfg.base = p.base; aiCfg.model = p.model; }
+            saveAiCfg(); render();
+          },
+        }, Object.keys(AI_PROVIDERS).map(k =>
+          h('option', { value: k, selected: aiCfg.provider === k ? '' : null }, AI_PROVIDERS[k].name)))),
+      h('label', { class: 'fld' }, 'API Key（只存在本机）',
+        h('input', { type: 'password', value: aiCfg.key, placeholder: 'sk-…', autocomplete: 'off', oninput: ev => { aiCfg.key = ev.target.value.trim(); saveAiCfg(); } }))),
+    h('div', { class: 'entry-cols', style: 'margin-top:10px' },
+      h('label', { class: 'fld' }, '接口地址', baseIn),
+      h('label', { class: 'fld' }, '模型名', modelIn)),
+    h('div', { class: 'row', style: 'margin-top:12px;gap:8px' },
+      h('button', {
+        class: 'btn', text: '测试连接',
+        onclick: async ev => {
+          if (!aiCfg.key || !aiCfg.base || !aiCfg.model) { aiMsg.className = 'msg err'; aiMsg.textContent = '服务商、接口地址、模型名、Key 都要填。'; return; }
+          ev.target.disabled = true; aiMsg.className = 'msg'; aiMsg.textContent = '测试中…';
+          try {
+            const r = await testAiCfg(aiCfg);
+            aiMsg.className = 'msg ok';
+            aiMsg.textContent = '连接成功' + (r ? '，模型回复：' + String(r).slice(0, 40) : ' ✓');
+          } catch (e) {
+            aiMsg.className = 'msg err';
+            aiMsg.textContent = '连接失败：' + e.message;
+          } finally { ev.target.disabled = false; }
+        },
+      }),
+      h('button', {
+        class: 'btn danger', text: '清除本机 Key',
+        onclick: () => { aiCfg.key = ''; saveAiCfg(); render(); },
+      })),
+    aiMsg,
+    h('p', { class: 'hint', style: 'margin:12px 0 0' },
+      '已实测支持浏览器直连：DeepSeek、通义、Kimi。智谱、OpenAI 不支持直连（会被浏览器拦截），' +
+      '如一定要用，请在「自定义」里填支持 CORS 的中转地址。')));
+
+  main.append(h('div', { class: 'card' },
+    h('h2', { text: '口径说明' }),
+    h('ul', { style: 'margin:8px 0 0;padding-left:20px;color:var(--ink-2);font-size:13px;line-height:1.9' },
+      h('li', { text: '总分 = 语文 + 数学 + 英语 + 物理 + 化学赋分 + 地理赋分，满分 750。' }),
+      h('li', { text: '「年级排名」为导入必填项，直接采用学校官方年排；未填写会阻止导入。' }),
+      h('li', { text: '学号是跨场追踪的稳定 ID；旧数据无学号时暂按「班级 + 姓名」对齐。重名请补学号，否则导入会拦截。' }),
+      h('li', { text: '单科名次、班内排名、各科均分只覆盖本次导入名单，不代表全校；年级排名采用学校官方年排。' }),
+      h('li', { text: '上线率分母为有有效总分的人数；越界分数按缺考处理并在导入前拦截。' }),
+      h('li', { text: '赋分按本场考试中该科有成绩的学生排位；要算准，需要录全年级选考该科的学生。' }),
+      h('li', { text: '学校已给赋分时，在导入表里加「化学赋分 地理赋分」两列覆盖即可；没有则按设置里的等级规则自动赋分。' }),
+      h('li', { text: '同分同档会让实际档位占比偏离设定；偏差较大时页面会提示，最终以学校赋分为准。' }),
+      h('li', { text: '「连续退步」和单科近三次走势只判断相邻场次均有成绩的情况，缺考不连缀比较。' }),
+      h('li', { text: '「偏科 / 不匹配」以自身失衡定档：某科得分率比该生六科平均低达到阈值标「关注」，失衡特别严重标「预警」；名单口径（低于该科均分 / 排名后段）只作佐证与排序，不单独触发，避免六科里总有一科靠后造成误报。阈值可在「设置」里调整。' }))));
+}
+
+/* ================================================================
+   启动
+   ================================================================ */
+document.getElementById('tabs').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-tab]');
+  if (!b) return;
+  ui.tab = b.dataset.tab;
+  render();
+});
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const next = isDark() ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem(LS_THEME, next); } catch (e) { /* ignore */ }
+  render();
+});
+(function initTheme() {
+  try {
+    const t = localStorage.getItem(LS_THEME);
+    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+  } catch (e) { /* ignore */ }
+})();
+data = loadData();
+aiCfg = loadAiCfg();
+(function initRoute() {
+  const hm = location.hash.slice(1).split('|');
+  if (hm[0] && ['overview', 'student', 'entry', 'settings'].includes(hm[0])) ui.tab = hm[0];
+  if (ui.tab === 'student' && hm[1]) {
+    try { ui.student = decodeURIComponent(hm[1]); } catch (e) { /* 兼容旧版链接：按姓名回退 */ }
+  }
+})();
+render();
+</script>
+</body>
+</html>
