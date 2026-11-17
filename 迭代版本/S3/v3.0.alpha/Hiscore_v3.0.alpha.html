@@ -2463,12 +2463,12 @@ body.v12 .panel { border:1px solid var(--border); overflow:hidden; }
 body.v12 .panel-header { min-height:52px; padding:13px 16px 11px; border-bottom:1px solid var(--grid); background:var(--surface); }
 body.v12 .panel-title { font-family:var(--sans); font-size:15px; font-weight:650; }
 body.v12 .panel-title::before { content:""; display:inline-block; width:4px; height:4px; margin:0 8px 3px 0; background:var(--cat-orange); box-shadow:3px -3px 0 var(--brass); }
-body.v12 .panel-body { padding:16px 18px; }
+body.v12 .panel-body { padding:18px 20px; }
 body.v12 .panel-tools .icon-btn { min-width:36px; min-height:36px; border-radius:var(--r-md); }
 body.v12 .context-bar,body.v12 .metric-strip { border-color:var(--border); }
 body.v12 .context-bar { background:var(--surface); border-radius:var(--r-lg); box-shadow:var(--shadow); }
-body.v12 .metric-strip { gap:12px; background:transparent; }
-body.v12 .metric-cell { position:relative; min-width:0; padding:16px 18px; border:1px solid var(--border); background:var(--surface); }
+body.v12 .metric-strip { gap:14px; background:transparent; }
+body.v12 .metric-cell { position:relative; min-width:0; padding:18px 20px; border:1px solid var(--border); background:var(--surface); }
 body.v12 .metric-cell:nth-child(2) { background:var(--surface); }
 body.v12[data-page="overview"] .metric-cell:first-child {
   background:var(--surface); background:color-mix(in srgb,var(--cat-orange) 10%,var(--surface));
@@ -2508,12 +2508,26 @@ body.v12 .agent-route { padding:2px 0; }
 body.v12 .agent-profile { grid-template-columns:minmax(120px,180px) minmax(0,1fr); gap:22px; align-items:center; padding:18px; border-radius:var(--r-lg); background:var(--surface-2); }
 body.v12 .agent-profile h3 { margin:0; font-size:23px; }
 body.v12 .agent-portrait { max-width:180px; max-height:240px; filter:drop-shadow(3px 3px 0 color-mix(in srgb,var(--brass) 24%,transparent)); }
-body.v12 .agent-capabilities { grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr)); gap:10px; }
+body.v12 .agent-capabilities { display:grid; gap:12px; grid-template-columns:1fr; }
+body.v12 .agent-capabilities.agent-capabilities-secondary { grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr)); gap:10px; }
 body.v12 .agent-capability { min-width:0; padding:13px 14px; border-color:var(--grid); border-radius:var(--r-md); background:var(--surface); }
+body.v12 .agent-capability.primary { padding:16px 18px; border-top:3px solid var(--cat-orange); }
+body.v12 .agent-capability.secondary { padding:10px 12px; }
+body.v12 .agent-capability.secondary .agent-capability-head { font-size:13px; }
+body.v12 .agent-capability.secondary p { font-size:12px; color:var(--muted); }
+body.v12 .agent-secondary-label { margin:0 0 -6px; font-size:11px; letter-spacing:.1em; color:var(--muted); }
+body.v12 .agent-route { margin-top:2px; }
+body.v12 .agent-status { margin:0 0 2px; }
 body.v12 .agent-state { min-height:26px; margin-left:auto; border-radius:var(--r-sm); font-size:12px; }
 body.v12 .agent-state.local-ready { color:var(--good-text); border-color:var(--good-text); }
 body.v12 :is(.ai-request-preview,.ai-draft-box,.ai-official-box) { border-radius:var(--r-md); }
 body.v12 .ai-request-preview { font:12px/1.65 var(--number); }
+@media (max-width:900px) {
+  body.v12 .agent-capabilities.agent-capabilities-secondary { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:560px) {
+  body.v12 .agent-capabilities.agent-capabilities-secondary { grid-template-columns:1fr; }
+}
 
 /* 桌面：单一固定校园侧栏，不再让品牌和导航各浮动一层。 */
 @media (min-width:1000px) {
@@ -9019,9 +9033,11 @@ function buildAgentHub(ctx) {
     h('p', { class: 'sub', text: active.role }),
     h('p', { class: 'hint', text: '当前考试：' + examName + '；当前学生：' + (ctx.student ? ctx.student.row.name : '暂无') }));
   root.append(h('div', { class: 'agent-profile' }, agentPortrait(active), detail));
-  const capabilities = h('ul', { class: 'agent-capabilities', 'aria-label': active.name + '能力目录' });
-  active.capabilities.forEach(cap => {
-    const item = h('li', { class: 'agent-capability' },
+  const primaryId = active.id === 'daxuejie' ? 'grade-import' : 'grade-analysis';
+  const primaryCap = active.capabilities.find(c => c.id === primaryId);
+  const secondaryCaps = active.capabilities.filter(c => c.id !== primaryId);
+  const makeCapItem = (cap, isPrimary) => {
+    const item = h('li', { class: 'agent-capability' + (isPrimary ? ' primary' : ' secondary') },
       h('div', { class: 'agent-capability-head' }, h('strong', { text: cap.name }), h('span', { class: 'agent-state ' + cap.status, text: AGENT_STATUS[cap.status] })),
       h('p', { text: cap.detail }));
     if (cap.id === 'grade-import') {
@@ -9039,9 +9055,19 @@ function buildAgentHub(ctx) {
       if (!hasStudents) item.append(h('p', { class: 'hint', text: '当前没有学生成绩；先完成真实导入，旧 AI 才会出现可分析的学生。' }));
       if (READ_ONLY) item.append(h('p', { class: 'hint', text: '只读模式不开放此入口，避免新增外发或修改路径。' }));
     }
-    capabilities.append(item);
-  });
-  root.append(capabilities);
+    return item;
+  };
+  const capabilityLists = h('div', { class: 'agent-capability-lists' });
+  if (primaryCap) {
+    capabilityLists.append(h('ul', { class: 'agent-capabilities agent-capabilities-primary', 'aria-label': active.name + '可用能力' }, makeCapItem(primaryCap, true)));
+  }
+  if (secondaryCaps.length) {
+    capabilityLists.append(
+      h('p', { class: 'agent-secondary-label', text: '未接入能力' }),
+      h('ul', { class: 'agent-capabilities agent-capabilities-secondary', 'aria-label': active.name + '未接入能力' }, secondaryCaps.map(c => makeCapItem(c, false)))
+    );
+  }
+  root.append(capabilityLists);
   if (active.id === 'daxuejie') root.append(h('p', { class: 'hint', text: '单场粘贴 / Excel 导入由大学姐承接；完整 JSON / Excel 恢复、CSV / PDF 导出和快照仍保留在「数据」页。' }));
   return root;
 }
