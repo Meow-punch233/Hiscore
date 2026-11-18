@@ -13,3 +13,7 @@ Thumbs.db
 *.swp
 *~
 .idea/
+
+# Local Qoder settings (do not push)
+.qoder/settings.local.json
+.qoder/worktrees/
