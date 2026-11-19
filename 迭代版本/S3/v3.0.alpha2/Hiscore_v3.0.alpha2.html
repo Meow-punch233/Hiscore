@@ -3081,6 +3081,124 @@ body.v12 .cap-card.legacy-link .cap-badge{color:var(--warn);border-color:var(--c
  body.v12 .agent-thread:not(:has(.agent-msg:not(.system))){max-height:none}
 }
 </style>
+<style id="v3-ui-refine">
+/* alpha2 界面精修层：只改呈现，不动脚本、数据与统计口径。 */
+
+/* 深色主按钮：--sign 与深色纸面几乎同色，改用浅绿强调色，与选中筹码一致。顶部配置类按钮仍保持次级样式。 */
+:root[data-theme="dark"] body.v12 button.btn.primary:not(.workspace-actions .btn) { background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+:root[data-theme="dark"] body.v12 button.btn.primary:not(.workspace-actions .btn):hover { background:var(--accent-hover); border-color:var(--accent-hover); color:var(--on-accent); }
+@media (prefers-color-scheme:dark) {
+  :root:not([data-theme="light"]) body.v12 button.btn.primary:not(.workspace-actions .btn) { background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+  :root:not([data-theme="light"]) body.v12 button.btn.primary:not(.workspace-actions .btn):hover { background:var(--accent-hover); border-color:var(--accent-hover); color:var(--on-accent); }
+}
+
+/* 重点关注概览：四类各带色条与淡底，数字换数字字体，一眼分出轻重。 */
+body.v12 .focus-summary { gap:10px; margin-bottom:12px; }
+body.v12 .focus-summary .fs-item {
+  position:relative; overflow:hidden; gap:2px; padding:10px 12px 9px 15px;
+  border-color:color-mix(in srgb,var(--fs-c,var(--grid)) 22%,var(--grid));
+  background:color-mix(in srgb,var(--fs-c,var(--surface-2)) 7%,var(--surface));
+}
+body.v12 .focus-summary .fs-item::before { content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--fs-c,var(--control-border)); }
+body.v12 .focus-summary .fs-item b { font-family:var(--number); font-size:24px; line-height:1.1; font-weight:650; font-variant-numeric:tabular-nums lining-nums; }
+body.v12 .focus-summary .fs-item span { font-size:11.5px; color:var(--ink-2); }
+body.v12 .focus-summary .fs-urgent { --fs-c:var(--critical); }
+body.v12 .focus-summary .fs-bias { --fs-c:var(--serious); }
+body.v12 .focus-summary .fs-line { --fs-c:var(--good-text); }
+body.v12 .focus-summary .fs-down { --fs-c:var(--brass); }
+body.v12 .attention-list .focus-tabs button { font-weight:550; }
+body.v12 .attention-list .focus-tabs button.on { box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 35%,transparent); }
+@media (max-width:700px) {
+  body.v12 .focus-summary { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+  body.v12 .focus-summary .fs-item b { font-size:21px; }
+}
+
+/* 指标瓷砖与面板：悬停时轻抬，统一层次。 */
+body.v12 .metric-cell { transition:border-color .18s, box-shadow .18s, transform .18s cubic-bezier(.23,1,.32,1); }
+@media (hover:hover) {
+  body.v12 .metric-strip > .metric-cell:hover { border-color:color-mix(in srgb,var(--accent) 45%,var(--border)); box-shadow:0 2px 4px rgba(34,58,49,.06),0 10px 22px rgba(34,58,49,.07); transform:translateY(-1px); }
+}
+body.v12 .panel-header { background:linear-gradient(180deg,var(--surface),color-mix(in srgb,var(--surface-2) 35%,var(--surface))); }
+
+/* 切换板块时指标与面板依次浮入；只在换页时触发，筛选重绘不会重播。 */
+@keyframes hsRise { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+@media (prefers-reduced-motion:no-preference) {
+  body.v12 .workbench.page-enter :is(.metric-strip > .metric-cell, .panel-grid > .panel, .cap-card) { animation:hsRise .38s cubic-bezier(.23,1,.32,1) both; }
+  body.v12 .workbench.page-enter .metric-strip > .metric-cell:nth-child(2) { animation-delay:.04s; }
+  body.v12 .workbench.page-enter .metric-strip > .metric-cell:nth-child(3) { animation-delay:.08s; }
+  body.v12 .workbench.page-enter .metric-strip > .metric-cell:nth-child(n+4) { animation-delay:.12s; }
+  body.v12 .workbench.page-enter .panel-grid > .panel { animation-delay:.1s; }
+  body.v12 .workbench.page-enter .panel-grid > .panel:nth-child(n+2) { animation-delay:.16s; }
+  body.v12 .workbench.page-enter .cap-card:nth-child(n+2) { animation-delay:.06s; }
+  body.v12 .workbench.page-enter .cap-card:nth-child(n+3) { animation-delay:.12s; }
+}
+
+/* 智能体页：能力卡更紧凑；宽屏左侧形象、主操作与说明并成一张卡，右侧消息区撑满剩余高度。 */
+body.v12 .cap-grid { grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); }
+body.v12 .cap-top { flex-wrap:wrap; row-gap:4px; }
+body.v12 .cap-card { transition:border-color .16s, background-color .16s; }
+body.v12 .cap-card.local-ready, body.v12 .cap-card.legacy-link { box-shadow:var(--shadow); }
+body.v12 .agent-msg.user { box-shadow:2px 2px 0 color-mix(in srgb,var(--accent) 18%,transparent); }
+@media (min-width:1200px) and (min-height:800px) {
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) {
+    grid-template-columns:clamp(260px,28%,340px) minmax(0,1fr);
+    grid-template-rows:auto auto auto minmax(0,1fr) auto auto;
+    column-gap:20px; row-gap:0;
+  }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot))::before {
+    content:""; grid-column:1; grid-row:2 / -1; min-height:0;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow);
+    background-image:radial-gradient(ellipse 80% 55% at 50% 0%,color-mix(in srgb,var(--accent-soft) 70%,transparent),transparent 70%);
+  }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-chrome { margin-bottom:14px; }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-stage {
+    grid-row:2; padding:28px 20px 16px; background:none; border:0; border-radius:0;
+  }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-actions {
+    grid-row:3; flex-direction:column; align-items:stretch; gap:8px; padding:4px 20px 0;
+  }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-actions .btn { width:100%; justify-content:center; }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-action-hint {
+    grid-row:4 / -1; align-self:start; margin:16px 20px 20px; padding-top:12px;
+    border-top:1px dashed var(--border); text-align:left;
+  }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-thread {
+    grid-row:2 / 5; max-height:none; min-height:0;
+    background-color:var(--surface-2);
+    background-image:radial-gradient(color-mix(in srgb,var(--brass) 16%,transparent) .8px,transparent .9px);
+    background-size:14px 14px;
+  }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-thread:not(:has(.agent-msg:not(.system))) {
+    max-height:none; align-content:center; justify-items:center;
+  }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-thread:not(:has(.agent-msg:not(.system)))::before {
+    content:""; width:36px; height:36px; margin-bottom:4px; background:var(--muted); opacity:.55;
+    -webkit-mask:var(--ic-ai) center/contain no-repeat; mask:var(--ic-ai) center/contain no-repeat;
+  }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-meta { grid-row:5; margin-top:12px; max-height:34dvh; overflow-y:auto; overscroll-behavior:contain; }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-dock { grid-row:6; margin-top:10px; background:transparent; }
+  /* 导入工具打开时壳是单列 flex，宽屏 grid 的 align-self 会把说明、能力卡和输入条缩成内容宽。 */
+  body.v12[data-page="agents"] .agent-hub:has(.agent-import-slot) :is(.agent-stage,.agent-actions,.agent-action-hint,.agent-thread,.agent-meta,.agent-dock) { align-self:stretch; }
+}
+
+/* 手机：总览 / 班级的三个筛选并成一行，标签在上，省出首屏高度给结论。 */
+@media (max-width:700px) {
+  body.v12 .context-bar:not(:has(input)) { grid-template-columns:repeat(auto-fit,minmax(96px,1fr)); gap:8px; padding:10px; }
+  body.v12 .context-bar:not(:has(input)) > .context-student { grid-column:auto; flex-direction:column; align-items:stretch; gap:3px; min-width:0; }
+  body.v12 .context-bar:not(:has(input)) .context-cap { font-size:11.5px; color:var(--muted); }
+  body.v12 .context-bar:not(:has(input)) select { width:100%; min-width:0; padding-left:10px; }
+  body.v12 .context-bar:not(:has(input)) > .scope-note { grid-column:1 / -1; }
+
+  /* 学生页检索：考试、搜索与名单下拉都撑满一行，不再长短不齐。 */
+  body.v12 .student-overview-tools { display:grid; grid-template-columns:minmax(0,1fr); }
+  body.v12 .student-overview-tools .overview-exam { display:grid; grid-template-columns:2.6em minmax(0,1fr); align-items:center; gap:8px; }
+  body.v12 .student-overview-tools .overview-exam select { width:100%; min-width:0; max-width:none; }
+  body.v12 .student-overview-tools .v41-picker, body.v12 .student-overview-tools .v41-picker .pr { width:100%; min-width:0; }
+  body.v12 .student-overview-tools .v41-picker .pr { display:grid; grid-template-columns:2.6em minmax(0,1fr); align-items:center; gap:8px; }
+  body.v12 .student-overview-tools .v41-picker .pr > input { width:100%; min-width:0; max-width:none; }
+  body.v12 .student-overview-tools .v41-picker .pr > select { grid-column:1 / -1; width:100%; min-width:0 !important; }
+}
+</style>
 <script>
 /* 启动诊断必须早于主脚本：即使主脚本解析失败，也能给出可见原因。 */
 window.__hsBootDone = false;
