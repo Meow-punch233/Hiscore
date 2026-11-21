@@ -2,7 +2,7 @@
 
 ## 当前版本与基底
 
-- 最新稳定版：`newest-version/Hiscore_v3.0.html`，SHA-256 `010aaa006d9d5523e1f351489103a788f8616a38cd8f86e657b75f6909b17e85`。
+- 最新稳定版：`newest-version/Hiscore_v3.0.html`，SHA-256 `41f0d270681d701f6c76ba0b73aa2ad5f2451ccbaf5dc1f955a7f0dbd9925b9a`。
 - GitHub Pages 发布副本：`docs/index.html`（与最新稳定版一致，更新时运行 `scripts/sync-pages.sh`）。
 - v3.0 迭代源文件：`迭代版本/S3/v3.0.beta/Hiscore_v3.0.beta.html`（与稳定版内容一致）。
 - v2.5 已归档：`迭代版本/S2/v2.5/Hiscore_v2.5.html`，SHA-256 `524d88d5c27da3b28673a8863c498a3a0549a9d4e7e1fd9a5174f8d918dfb551`；不再覆盖，也不再作为最新版。

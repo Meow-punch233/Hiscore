@@ -2986,6 +2986,8 @@ body.v12 .student-conclusion-note { margin:3px 0 0; font-size:11px; }
   body.v12 .workbench > .metric-strip .metric-cell { padding:13px 16px 12px; }
   body.v12 .workbench > .panel-grid { flex:1 1 auto; min-height:0; margin-top:12px; }
   body.v12 .workbench > .panel-grid .panel { min-height:0; }
+  /* PC 固定工作台：整页不滚动，长面板必须在面板体内滚，否则班级/学生内容会被 panel 的 overflow:hidden 裁掉。 */
+  body.v12 .workbench > .panel-grid .panel-body { overflow:auto; }
   /* 「再看」展开后：主视觉与次要内容按自然高度排布，工作台内部滚动，文档页仍不滚动。 */
   body.v12 .workbench:has(> .more-grid:not([hidden])) { overflow-y:auto; overscroll-behavior:contain; }
   body.v12 .workbench:has(> .more-grid:not([hidden])) > .panel-grid { flex:none; grid-auto-rows:auto; }
@@ -3052,10 +3054,12 @@ body.v12 .focus-row:hover{background:color-mix(in srgb,var(--accent-soft) 55%,tr
 /* 页面操作：配置类按钮退为次级 */
 body.v12 .workspace-actions .btn.primary{background:var(--surface);color:var(--ink);border-color:var(--control-border);font-weight:500}
 body.v12 .workspace-actions .btn.primary:hover{background:var(--surface-2);border-color:var(--accent);color:var(--ink)}
-/* 裁切修复：学生页、班级页面板随内容增高 */
-body.v12:is([data-page="student"],[data-page="pk"]) .panel-grid.primary-zone{flex:none;height:auto;grid-auto-rows:auto}
-body.v12:is([data-page="student"],[data-page="pk"]) .panel-grid.primary-zone .panel{height:auto;overflow:visible}
-body.v12:is([data-page="student"],[data-page="pk"]) .panel-grid.primary-zone .panel-body{flex:none;max-height:none;overflow:visible}
+/* 裁切修复：学生页、班级页面板随内容增高（仅限整页滚动的尺寸；PC 固定工作台仍让面板内部滚动） */
+@media (max-width:1199px), (max-height:799px) {
+  body.v12:is([data-page="student"],[data-page="pk"]) .panel-grid.primary-zone{flex:none;height:auto;grid-auto-rows:auto}
+  body.v12:is([data-page="student"],[data-page="pk"]) .panel-grid.primary-zone .panel{height:auto;overflow:visible}
+  body.v12:is([data-page="student"],[data-page="pk"]) .panel-grid.primary-zone .panel-body{flex:none;max-height:none;overflow:visible}
+}
 /* 班级战队卡 */
 body.v12 .pk-rank-tag{color:color-mix(in srgb,var(--tc) 55%,var(--ink));font-weight:700;letter-spacing:.06em}
 body.v12 .pk-card{transition:transform .16s cubic-bezier(.23,1,.32,1),box-shadow .16s}
