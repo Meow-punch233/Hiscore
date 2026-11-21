@@ -2,10 +2,11 @@
 
 ## 当前版本与基底
 
-- v3.0.alpha 的实施文件：`迭代版本/S3/v3.0.alpha/Hiscore_v3.0.alpha.html`。
-- 稳定基底：`newest-version/Hiscore_v2.5.html`，SHA-256 `524d88d5c27da3b28673a8863c498a3a0549a9d4e7e1fd9a5174f8d918dfb551`。
-- 不覆盖 v2.5；全部验收通过前，不把 alpha 同步为最新稳定版。
-- 完整方案见 `Hiscore_v3.0.alpha-方案-第1版.md`。
+- 最新稳定版：`newest-version/Hiscore_v3.0.html`，SHA-256 `010aaa006d9d5523e1f351489103a788f8616a38cd8f86e657b75f6909b17e85`。
+- GitHub Pages 发布副本：`docs/index.html`（与最新稳定版一致，更新时运行 `scripts/sync-pages.sh`）。
+- v3.0 迭代源文件：`迭代版本/S3/v3.0.beta/Hiscore_v3.0.beta.html`（与稳定版内容一致）。
+- v2.5 已归档：`迭代版本/S2/v2.5/Hiscore_v2.5.html`，SHA-256 `524d88d5c27da3b28673a8863c498a3a0549a9d4e7e1fd9a5174f8d918dfb551`；不再覆盖，也不再作为最新版。
+- v3.0.alpha 方案与实施文件：`迭代版本/S3/v3.0.alpha/Hiscore_v3.0.alpha.html`；完整方案见 `Hiscore_v3.0.alpha-方案-第1版.md`。
 
 ## 旧学生 AI 保留约束（Aki 明确要求，2026-11-17）
 
@@ -28,4 +29,4 @@
 
 - 每个阶段提取内联脚本跑 `node --check`，并做浏览器 console 与交互回归；静态检查不能代替实测。
 - 重点覆盖旧 localStorage/布局、慢 XLSX 竞态、写盘与 IndexedDB 失败、导入双实例、只读绕过、JSON/Excel 往返、手机导出和离线。
-- 预览使用 `.claude/launch.json` 的 `campus-pixel-preview`（8902）；alpha 路径为 `/迭代版本/S3/v3.0.alpha/Hiscore_v3.0.alpha.html`，刷新加 `?v=时间戳`。
+- 预览使用 `.claude/launch.json` 的 `campus-pixel-preview`（8902）；最新版路径为 `/newest-version/Hiscore_v3.0.html`，迭代版路径为 `/迭代版本/S3/v3.0.beta/Hiscore_v3.0.beta.html`，刷新加 `?v=时间戳`。
