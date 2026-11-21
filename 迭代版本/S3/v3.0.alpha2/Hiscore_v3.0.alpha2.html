@@ -2295,7 +2295,7 @@ body.v12 .workbench { min-height: calc(100dvh / var(--fs-zoom)); }
 .agent-actions .btn { min-height: 44px; padding: 10px 22px; font-size: 14px; }
 .agent-action-hint { margin: 0; text-align: center; }
 .agent-import-slot { padding: 14px; border: 1px dashed var(--border); border-radius: 10px; background: var(--surface-2); }
-.agent-thread { display: grid; gap: 8px; align-content: start; max-height: 240px; overflow-y: auto; padding: 12px; border: 1px solid var(--grid); border-radius: 10px; background: var(--surface-2); }
+.agent-thread { display: grid; gap: 8px; align-content: start; min-height:112px; max-height: 240px; overflow-y: auto; overscroll-behavior:contain; padding: 12px; border: 1px solid var(--grid); border-radius: 10px; background: var(--surface-2); }
 .agent-msg { max-width: 82%; padding: 8px 12px; border-radius: 10px; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-wrap; }
 .agent-msg.system { max-width: 100%; justify-self: center; text-align: center; background: transparent; border: 1px dashed var(--border); color: var(--muted); font-size: 12px; }
 .agent-msg.user { justify-self: end; background: var(--accent-soft); border: 1px solid var(--accent); color: var(--ink); border-bottom-right-radius: 3px; }
@@ -2818,7 +2818,7 @@ body.v12 .settings-accordion > .panel-placeholder, body.v12 .entry-accordion > .
 body.v12 .settings-tabs { flex:none; display:flex; flex-wrap:wrap; gap:4px; padding:4px; background:var(--surface-2); border:1px solid var(--grid); border-radius:var(--r-md); }
 body.v12 .settings-nav-item { flex:1 1 0; min-width:108px; display:flex; align-items:center; justify-content:center; text-align:center; padding:9px 14px; background:transparent; border:1px solid transparent; border-radius:calc(var(--r-md) - 2px); cursor:pointer; font:inherit; box-shadow:none; }
 body.v12 .settings-nav-item:hover { border-color:var(--border); background:var(--surface); }
-body.v12 .settings-nav-item.on { background:var(--surface); border-color:var(--accent); box-shadow:var(--shadow); }
+body.v12 .settings-nav-item.on { background:var(--accent-soft); border-color:color-mix(in srgb,var(--accent) 42%,transparent); box-shadow:none; }
 body.v12 .settings-nav-label { font-weight:650; font-size:14px; color:var(--ink); }
 body.v12 .settings-nav-item.on .settings-nav-label::before { content:""; display:inline-block; width:5px; height:5px; margin:0 7px 2px 0; background:var(--cat-orange); box-shadow:2px -2px 0 var(--brass); }
 body.v12 .settings-tabs-meta { display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 16px; padding:0 4px; }
@@ -2939,16 +2939,53 @@ body.v12 .set-tbl input[type="number"] { min-height:34px; padding:4px 8px; }
   body.v12 :is(input[type="date"],input[type="search"]) { min-height:44px; font-size:16px; }
 }
 
-/* 备份与导出：按用途分三组，本机快照独立一块；不再是挤成一行的按钮长条。 */
-body.v12 .backup-groups { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; align-items:start; }
-body.v12 .backup-group { min-width:0; padding:12px 14px 14px; border:1px solid var(--grid); border-radius:var(--r-md); background:var(--surface-2); }
-body.v12 .backup-group-title { margin:0; font-family:var(--sans); font-size:13px; font-weight:650; color:var(--ink); }
-body.v12 .backup-group-title::before { content:""; display:inline-block; width:4px; height:4px; margin:0 8px 3px 0; background:var(--cat-orange); box-shadow:3px -3px 0 var(--brass); }
-body.v12 .backup-group-note { margin:5px 0 10px; font-size:11.5px; line-height:1.6; }
-body.v12 .backup-group-actions { display:flex; flex-direction:column; gap:8px; align-items:stretch; }
+/* 备份与导出：标签 / 用途分组 / 本机快照三层。桌面上每组固定高度，按钮一行一个，长列表只在组内滚。 */
+body.v12 .entry-accordion[data-group="backup"] { gap:10px; }
+/* 数据页备份组：标签用统一固定宽度，避免 flex:1 按可用空间拉伸导致宽度随窗口变化。 */
+body.v12 .entry-accordion[data-group="backup"] .settings-tabs { flex:none; align-self:stretch; display:flex; flex-wrap:nowrap; gap:6px; width:100%; }
+body.v12 .entry-accordion[data-group="backup"] .settings-nav-item { flex:1 1 0; min-width:0; width:auto; height:42px; padding:8px 12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; box-sizing:border-box; }
+body.v12 .entry-accordion[data-group="backup"] .settings-tabs-meta { padding:0 2px; }
+/* 桌面放宽数据页工作台：卡片跟随可用宽度铺满，不再被 1440px 上限截住。 */
+@media (min-width:1200px) and (min-height:800px) {
+  body.v12:not(.printing-doc)[data-page="entry"] .workbench { max-width:none; width:auto; margin-left:calc(var(--sidebar) + 32px); margin-right:32px; padding-left:20px; padding-right:20px; }
+}
+body.v12 .backup-groups { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-content:start; justify-content:stretch; width:100%; max-width:none; min-width:0; gap:14px; min-height:0; }
+body.v12 .entry-accordion[data-group="backup"] .settings-group-body,
+body.v12 .entry-accordion[data-group="backup"] .panel,
+body.v12 .entry-accordion[data-group="backup"] .panel-body { width:100%; max-width:none; min-width:0; }
+body.v12 .backup-group { width:100%; max-width:none; }
+body.v12 .backup-group { display:flex; flex-direction:column; min-width:0; min-height:0; padding:10px 13px 13px; border:1px solid var(--grid); border-radius:var(--r-md); background:var(--surface-2); }
+body.v12 .backup-group-title { display:flex; align-items:center; gap:7px; margin:0; font-family:var(--sans); font-size:12.5px; font-weight:650; letter-spacing:.01em; color:var(--ink); }
+body.v12 .backup-group-title::before { content:""; flex:none; width:4px; height:4px; background:var(--cat-orange); box-shadow:3px -3px 0 var(--brass); }
+body.v12 .backup-group-note { margin:4px 0 8px; font-size:11px; line-height:1.45; color:var(--muted); }
+body.v12 .backup-group-actions { display:flex; flex-direction:column; gap:6px; align-items:stretch; min-height:0; }
 body.v12 .backup-group-actions > span { display:contents; }
-body.v12 .backup-group-actions .btn { width:100%; min-height:38px; justify-content:center; }
-body.v12 .backup-groups > .snap-section { grid-column:1/-1; margin:0; padding:12px 14px 14px; border:1px solid var(--grid); border-radius:var(--r-md); background:var(--surface); }
+body.v12 .backup-group-actions .btn { width:100%; min-height:34px; justify-content:center; white-space:nowrap; font-size:12px; padding:4px 10px; }
+body.v12 .backup-groups > .snap-section { grid-column:1/-1; margin:0; padding:10px 13px 12px; border:1px solid var(--grid); border-radius:var(--r-md); background:var(--surface); display:flex; flex-direction:column; gap:5px; min-height:0; }
+body.v12 .backup-groups > .snap-section > .row { flex:none; gap:8px; }
+body.v12 .backup-groups > .snap-section > .row > strong { display:flex; align-items:center; gap:7px; font-size:12.5px; }
+body.v12 .backup-groups > .snap-section > .row > strong::before { content:""; width:4px; height:4px; background:var(--cat-orange); box-shadow:3px -3px 0 var(--brass); }
+body.v12 .backup-groups > .snap-section > .row .btn { min-height:32px; font-size:12px; padding:4px 10px; }
+body.v12 .backup-groups > .snap-section > .snap-info { margin:0; font-size:11px; }
+body.v12 .backup-groups > .snap-section > .snap-list { flex:1; min-height:0; max-height:112px; overflow-y:auto; overscroll-behavior:contain; padding-right:3px; }
+body.v12 .backup-groups > .snap-section > .snap-list .snap-row { flex-wrap:nowrap; padding:5px 8px; }
+body.v12 .backup-groups > .snap-section > .snap-list .snap-meta .hint { display:none; }
+body.v12 .backup-groups > .snap-section > .hint:last-child { margin:0; font-size:11px; }
+body.v12 .entry-accordion[data-group="backup"] .panel-body > .panel-heading:first-child,
+body.v12 .entry-accordion[data-group="backup"] .panel-body > .panel-title:first-child { display:none; }
+@media (min-width:1200px) and (min-height:800px) {
+  body.v12 .entry-accordion[data-group="backup"] .settings-group-body { overflow:hidden; }
+  body.v12 .backup-groups { max-height:100%; }
+  body.v12 .backup-group-actions { overflow-y:auto; overscroll-behavior:contain; flex:1; padding-right:3px; }
+  body.v12 .backup-group-actions .btn { flex:none; }
+}
+@media (max-width:1199px), (max-height:799px) {
+  body.v12 .backup-groups { grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); }
+  body.v12 .backup-group-actions { flex:initial; overflow:visible; }
+  body.v12 .backup-group-actions .btn { min-height:38px; }
+  body.v12 .backup-groups > .snap-section > .snap-list { max-height:none; overflow:visible; }
+  body.v12 .backup-groups > .snap-section > .snap-list .snap-meta .hint { display:block; }
+}
 @media (max-width:700px) {
   body.v12 .backup-groups { grid-template-columns:1fr; }
   body.v12 .backup-group-actions .btn { min-height:44px; }
@@ -2973,8 +3010,10 @@ body.v12 .student-conclusion-note { margin:3px 0 0; font-size:11px; }
   body.v12:not(.printing-doc) header.app { height:0; }
   body.v12:not(.printing-doc) .workbench {
     display:flex; flex-direction:column; height:calc(100dvh / var(--fs-zoom,1)); min-height:0;
-    margin:0 0 0 calc(var(--sidebar) + 32px); padding:18px 32px 14px; overflow:hidden;
+    margin:0 0 0 calc(var(--sidebar) + 32px); padding:18px 32px 14px;
+    overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain;
   }
+  body.v12:not(.printing-doc):not([data-page="agents"]) .workbench { overflow-y:hidden; }
   body.v12 .workbench > :is(.workspace-bar,.context-bar,.metric-strip,.workspace-status,.student-overview,.more-divider,.settings-warning-slot,.mobile-panel-tabs,.cfg-warn) { flex:none; }
   body.v12 .workbench > .context-bar { margin-top:10px; }
   body.v12 .workbench > .metric-strip { margin-top:12px; }
@@ -2996,7 +3035,19 @@ body.v12 .student-conclusion-note { margin:3px 0 0; font-size:11px; }
   body.v12[data-page="pk"] .pk-extra { margin-top:12px; }
 }
 @media (min-width:1700px) and (min-height:800px) {
-  body.v12:not(.printing-doc) .workbench { padding:22px 40px 16px; }
+  body.v12:not(.printing-doc) .workbench { padding:18px 20px 16px; }
+}
+
+/* 数据页桌面：按实际 CSS 视口铺满，覆盖 min-width:1000px/1700px 的窄化规则。 */
+@media (min-width:1200px) and (min-height:800px) {
+  body.v12:not(.printing-doc)[data-page="entry"] .workbench {
+    max-width:none !important;
+    width:calc(100vw - var(--sidebar)) !important;
+    margin-left:var(--sidebar) !important;
+    margin-right:0 !important;
+    padding-left:16px !important;
+    padding-right:16px !important;
+  }
 }
 
 /* 小懂弟&大学姐：壳铺满工作台；宽屏左舞台右消息，输入钉底，只有消息区内滚。 */
@@ -3008,7 +3059,7 @@ body.v12 .agent-meta > .hint { margin:0; }
   body.v12[data-page="agents"] .agent-chrome { grid-column:1/-1; grid-row:1; display:flex; flex-direction:row; align-items:center; gap:14px; }
   body.v12[data-page="agents"] .agent-chrome .agent-switcher { flex:0 1 520px; margin:0; max-width:520px; }
   body.v12[data-page="agents"] .agent-chrome .agent-ctx { flex:1 1 300px; min-width:260px; }
-  body.v12[data-page="agents"] .agent-main { display:contents; }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-main { display:contents; }
   body.v12[data-page="agents"] .agent-stage { grid-column:1; grid-row:2; align-self:start; padding:16px 14px 12px; background:var(--surface); border:1px solid var(--grid); border-radius:var(--r-lg); }
   body.v12[data-page="agents"] .agent-portrait { max-width:116px; max-height:150px; }
   body.v12[data-page="agents"] .agent-actions { grid-column:1; grid-row:3; align-self:start; }
@@ -3017,6 +3068,8 @@ body.v12 .agent-meta > .hint { margin:0; }
   body.v12[data-page="agents"] .agent-meta { grid-column:2; grid-row:3; align-self:start; }
   body.v12[data-page="agents"] .agent-unconnected[open] { max-height:26dvh; overflow:auto; }
   body.v12[data-page="agents"] .agent-dock { grid-column:2; grid-row:4; align-self:end; }
+  /* 打磨层会把消息壳切成 display:contents，这里撤销，让外层网格仍能钉住输入栏。 */
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-main { display:contents; }
   /* 打开导入工具时回到单列：工具在中间区内滚，输入仍钉底。 */
   body.v12[data-page="agents"] .agent-hub:has(.agent-import-slot) { display:flex; flex-direction:column; }
   body.v12[data-page="agents"] .agent-hub:has(.agent-import-slot) .agent-main { display:flex; }
@@ -3047,10 +3100,16 @@ body.v12 .focus-row:hover{background:color-mix(in srgb,var(--accent-soft) 55%,tr
 /* 页面操作：配置类按钮退为次级 */
 body.v12 .workspace-actions .btn.primary{background:var(--surface);color:var(--ink);border-color:var(--control-border);font-weight:500}
 body.v12 .workspace-actions .btn.primary:hover{background:var(--surface-2);border-color:var(--accent);color:var(--ink)}
-/* 裁切修复：学生页、班级页面板随内容增高 */
-body.v12:is([data-page="student"],[data-page="pk"]) .panel-grid.primary-zone{flex:none;height:auto;grid-auto-rows:auto}
-body.v12:is([data-page="student"],[data-page="pk"]) .panel-grid.primary-zone .panel{height:auto;overflow:visible}
-body.v12:is([data-page="student"],[data-page="pk"]) .panel-grid.primary-zone .panel-body{flex:none;max-height:none;overflow:visible}
+/* 裁切修复只作用于非桌面：桌面仍由一屏网格与主区内滚接管，不在这里改成自然高度。 */
+@media (min-width:1200px) and (min-height:800px) {
+  /* 后来的自然流式覆盖不能盖掉一屏内滚：主区网格继续按剩余视口取高，面板内容在 .panel-body 内滚。 */
+  body.v12:is([data-page="student"],[data-page="pk"]) .panel-grid.primary-zone .panel-body { overflow:auto; max-height:none; }
+}
+@media (max-width:1199px), (max-height:799px) {
+  body.v12:is([data-page="student"],[data-page="pk"]) .panel-grid.primary-zone{flex:none;height:auto;grid-auto-rows:auto}
+  body.v12:is([data-page="student"],[data-page="pk"]) .panel-grid.primary-zone .panel{height:auto;overflow:visible}
+  body.v12:is([data-page="student"],[data-page="pk"]) .panel-grid.primary-zone .panel-body{flex:none;max-height:none;overflow:visible}
+}
 /* 班级战队卡 */
 body.v12 .pk-rank-tag{color:color-mix(in srgb,var(--tc) 55%,var(--ink));font-weight:700;letter-spacing:.06em}
 body.v12 .pk-card{transition:transform .16s cubic-bezier(.23,1,.32,1),box-shadow .16s}
@@ -3059,7 +3118,9 @@ body.v12 .pk-card-stats span:last-child{display:grid;grid-template-columns:auto 
 body.v12 .pk-card-stats span:last-child::before{content:"人数";grid-column:1/-1;justify-self:end}
 @media(min-width:1000px){body.v12 :has(>.pk-card){grid-template-columns:repeat(3,minmax(0,1fr))}}
 /* 智能体页：能力卡 */
-body.v12 .agent-thread:not(:has(.agent-msg:not(.system))){min-height:0;max-height:84px}
+body.v12 .agent-thread:not(:has(.agent-msg.user)){max-height:none;overflow-y:auto;overscroll-behavior:contain}
+body.v12 .agent-thread:not(:has(.agent-msg.user)) .agent-msg.system { display:block; max-width:min(100%,42ch); width:fit-content; padding:8px 12px; margin:0 auto; border:1px dashed var(--border); border-radius:var(--r-md); background:var(--surface); color:var(--muted); font-size:12px; line-height:1.5; text-align:center; }
+body.v12 .agent-thread:not(:has(.agent-msg.user)) .agent-msg.system::after { content:"模型尚未接入，下面的输入只留在本页内存，不会生成回复、路由或结果，刷新即清空。"; }
 body.v12 .cap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;width:100%}
 body.v12 .cap-card{display:grid;gap:5px;align-content:start;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--control-border);border-radius:var(--r-md)}
 body.v12 .cap-card.local-ready{border-top-color:var(--accent);background:color-mix(in srgb,var(--accent-soft) 55%,var(--surface))}
@@ -3078,7 +3139,7 @@ body.v12 .cap-card.legacy-link .cap-badge{color:var(--warn);border-color:var(--c
  body.v12 .context-bar select{width:100%;min-width:0;font-size:13px;padding-left:8px}
  body.v12 .workspace-actions .btn.primary{display:none}
  body.v12 nav.tabs button{font-size:12px}
- body.v12 .agent-thread:not(:has(.agent-msg:not(.system))){max-height:none}
+ body.v12 .agent-thread:not(:has(.agent-msg.user)){max-height:none; overflow-y:auto; overscroll-behavior:contain;}
 }
 </style>
 <style id="v3-ui-refine">
@@ -3141,44 +3202,65 @@ body.v12 .cap-card.local-ready, body.v12 .cap-card.legacy-link { box-shadow:var(
 body.v12 .agent-msg.user { box-shadow:2px 2px 0 color-mix(in srgb,var(--accent) 18%,transparent); }
 @media (min-width:1200px) and (min-height:800px) {
   body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) {
-    grid-template-columns:clamp(260px,28%,340px) minmax(0,1fr);
-    grid-template-rows:auto auto auto minmax(0,1fr) auto auto;
-    column-gap:20px; row-gap:0;
+    display:grid; grid-template-columns:clamp(260px,28%,340px) minmax(0,1fr);
+    grid-template-rows:auto minmax(0,1fr) auto; gap:10px 20px;
   }
-  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot))::before {
-    content:""; grid-column:1; grid-row:2 / -1; min-height:0;
-    background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow);
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-chrome {
+    grid-column:1; grid-row:1; display:flex; flex-direction:row; align-items:center; gap:14px; margin-bottom:0;
+  }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-chrome .agent-switcher { flex:0 1 520px; margin:0; max-width:520px; }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-chrome .agent-ctx { flex:1 1 300px; min-width:260px; }
+  /* 左列是真正的布局元素，不再靠 ::before 占位；操作卡与能力卡互不覆盖。 */
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-main { display:contents; }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) :is(.agent-stage,.agent-actions,.agent-action-hint,.agent-thread,.agent-meta) { grid-column:1; }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-thread { grid-column:2; grid-row:2 / 5; align-self:stretch; }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-stage {
+    grid-row:2; align-self:start; padding:18px 18px 10px; background:var(--surface);
+    border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow);
     background-image:radial-gradient(ellipse 80% 55% at 50% 0%,color-mix(in srgb,var(--accent-soft) 70%,transparent),transparent 70%);
   }
-  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-chrome { margin-bottom:14px; }
-  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-stage {
-    grid-row:2; padding:28px 20px 16px; background:none; border:0; border-radius:0;
-  }
   body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-actions {
-    grid-row:3; flex-direction:column; align-items:stretch; gap:8px; padding:4px 20px 0;
+    grid-row:3; align-self:start; flex-direction:column; align-items:stretch; gap:8px;
+    padding:12px 14px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md);
   }
   body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-actions .btn { width:100%; justify-content:center; }
   body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-action-hint {
-    grid-row:4 / -1; align-self:start; margin:16px 20px 20px; padding-top:12px;
-    border-top:1px dashed var(--border); text-align:left;
+    grid-row:4; align-self:start; margin:0; padding:10px 14px; text-align:left;
+    border:1px dashed var(--border); border-radius:var(--r-md); color:var(--ink-2); background:var(--surface-2);
   }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-action-hint:last-child { grid-row:3; }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-main > .agent-meta:last-child { grid-row:4; align-self:end; }
   body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-thread {
-    grid-row:2 / 5; max-height:none; min-height:0;
+    grid-row:2 / 5; max-height:none; min-height:0; overflow-y:auto; overscroll-behavior:contain;
     background-color:var(--surface-2);
     background-image:radial-gradient(color-mix(in srgb,var(--brass) 16%,transparent) .8px,transparent .9px);
     background-size:14px 14px;
   }
-  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-thread:not(:has(.agent-msg:not(.system))) {
-    max-height:none; align-content:center; justify-items:center;
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-thread:not(:has(.agent-msg.user)) {
+    align-content:center; justify-items:center;
   }
-  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-thread:not(:has(.agent-msg:not(.system)))::before {
-    content:""; width:36px; height:36px; margin-bottom:4px; background:var(--muted); opacity:.55;
-    -webkit-mask:var(--ic-ai) center/contain no-repeat; mask:var(--ic-ai) center/contain no-repeat;
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-thread:not(:has(.agent-msg.user))::before {
+    content:"模型尚未接入，下面的输入只留在本页内存。";
+    display:block; max-width:34ch; padding:12px 14px; margin:0 auto;
+    border:1px dashed var(--border); border-radius:var(--r-md);
+    background:var(--surface); color:var(--muted); font-size:12px; line-height:1.6; text-align:center;
   }
-  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-meta { grid-row:5; margin-top:12px; max-height:34dvh; overflow-y:auto; overscroll-behavior:contain; }
-  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-dock { grid-row:6; margin-top:10px; background:transparent; }
-  /* 导入工具打开时壳是单列 flex，宽屏 grid 的 align-self 会把说明、能力卡和输入条缩成内容宽。 */
-  body.v12[data-page="agents"] .agent-hub:has(.agent-import-slot) :is(.agent-stage,.agent-actions,.agent-action-hint,.agent-thread,.agent-meta,.agent-dock) { align-self:stretch; }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-meta {
+    grid-row:4; align-self:start; margin:0; padding:10px 14px;
+    max-height:26dvh; overflow-y:auto; overscroll-behavior:contain;
+    border:1px dashed var(--border); border-radius:var(--r-md); background:var(--surface-2); box-shadow:none;
+  }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .cap-grid { grid-template-columns:1fr; }
+  body.v12[data-page="agents"] .agent-hub:not(:has(.agent-import-slot)) .agent-dock {
+    grid-column:1 / -1; grid-row:4; align-self:end; margin-top:0; background:transparent;
+  }
+  /* 导入工具打开时回到单列 flex，能力卡、提示与输入条必须全宽。 */
+  body.v12[data-page="agents"] .agent-hub:has(.agent-import-slot),
+  body.v12[data-page="agents"] .agent-hub:has(.agent-import-slot) .agent-main {
+    display:flex; flex-direction:column; min-height:0; overflow:hidden;
+  }
+  body.v12[data-page="agents"] .agent-hub:has(.agent-import-slot) .agent-main { flex:1 1 auto; overflow-y:auto; }
+  body.v12[data-page="agents"] .agent-hub:has(.agent-import-slot) :is(.agent-stage,.agent-actions,.agent-action-hint,.agent-import-slot,.agent-thread,.agent-meta,.agent-dock) { align-self:stretch; width:100%; }
 }
 
 /* 手机：总览 / 班级的三个筛选并成一行，标签在上，省出首屏高度给结论。 */
@@ -3198,6 +3280,20 @@ body.v12 .agent-msg.user { box-shadow:2px 2px 0 color-mix(in srgb,var(--accent) 
   body.v12 .student-overview-tools .v41-picker .pr > input { width:100%; min-width:0; max-width:none; }
   body.v12 .student-overview-tools .v41-picker .pr > select { grid-column:1 / -1; width:100%; min-width:0 !important; }
 }
+</style>
+<style id="v3-backup-final-20261119c">
+/* 强制层：放在所有原样式之后，覆盖任何旧打磨层留下的 auto-fit 四列规则。 */
+body.v12 .backup-groups {
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  width:100% !important; max-width:none !important; min-width:0 !important;
+  align-content:start; justify-content:stretch;
+}
+body.v12 .backup-groups > .backup-group,
+body.v12 .backup-groups > .snap-section { grid-column:auto !important; width:100% !important; max-width:none !important; }
+body.v12 .backup-groups > .snap-section { grid-column:1 / -1 !important; }
+body.v12 .settings-tabs { display:flex !important; flex-wrap:nowrap !important; width:100% !important; }
+body.v12 .settings-nav-item { flex:1 1 0 !important; min-width:0 !important; white-space:nowrap !important; }
 </style>
 <script>
 /* 启动诊断必须早于主脚本：即使主脚本解析失败，也能给出可见原因。 */
@@ -9815,6 +9911,7 @@ function buildAgentHub(ctx) {
   const msgs = agentThread[active.id];
   const thread = h('div', { class: 'agent-thread', role: 'log', 'aria-live': 'polite', 'aria-label': '与' + active.name + '的对话' },
     h('div', { class: 'agent-msg system', text: '模型尚未接入。下面的输入只留存在本页内存，不会生成回复、路由或结果；刷新页面即清空。' }));
+  // 空状态提示是 .agent-thread 自身的内容（::before），不是绝对定位层；不覆盖能力卡与输入框。
   msgs.forEach(m => thread.append(h('div', { class: 'agent-msg ' + m.role, text: m.text })));
   main.append(thread);
   // 底部说明与「尚未接入」收进一个容器：宽屏网格里占同一格，窄屏随文档流。
@@ -9830,7 +9927,7 @@ function buildAgentHub(ctx) {
       h('summary', { text: '尚未接入：' + unconnected.map(c => c.name).join(' · ') }),
       h('ul', {}, unconnected.map(c => h('li', {}, h('strong', { text: c.name }), h('span', { text: c.detail }))))));
   }
-  if (meta.children.length) main.append(meta);
+  if (meta.children.length) { meta.classList.add('agent-capabilities'); main.append(meta); }
   const input = h('textarea', { class: 'agent-input', rows: 1, placeholder: '对' + active.name + '说点什么…（模型尚未接入，仅留存）', 'aria-label': '输入给' + active.name + '的话' });
   input.value = agentDraft[active.id] || '';
   input.addEventListener('input', () => { agentDraft[active.id] = input.value; });
@@ -9842,7 +9939,12 @@ function buildAgentHub(ctx) {
     render();
     requestAnimationFrame(() => {
       const t = document.querySelector('.agent-input'); if (t) t.focus();
-      const mainEl = document.querySelector('.agent-main'); if (mainEl) mainEl.scrollTop = mainEl.scrollHeight;
+      // 宽屏 .agent-main 是 display:contents，真正滚动的是 .agent-thread；窄屏仍滚 .agent-main。
+      const shell = root.isConnected ? root : document;
+      const mainEl = shell.querySelector('.agent-main');
+      if (mainEl && getComputedStyle(mainEl).display !== 'contents') mainEl.scrollTop = mainEl.scrollHeight;
+      const threadEl = shell.querySelector('.agent-thread');
+      if (threadEl) threadEl.scrollTop = threadEl.scrollHeight;
     });
   };
   input.addEventListener('keydown', ev => { if (ev.key === 'Enter' && !ev.shiftKey && !ev.isComposing) { ev.preventDefault(); send(); } });
@@ -11166,7 +11268,7 @@ const ENTRY_GROUPS = [
 let entryOpenGroup = 'exams';
 function buildEntryAccordion(ctx) {
   const groups = ENTRY_GROUPS.map(g => ({ ...g, items: g.ids.filter(id => PANEL_DEFS[id]).map(id => ({ id, size: 'full' })) })).filter(g => g.items.length);
-  const root = h('div', { class: 'entry-accordion' });
+  const root = h('div', { class: 'entry-accordion', 'data-group': groups[0].id });
   if (!groups.length) {
     root.append(h('div', { class: 'panel-placeholder' }, h('strong', { text: '数据工具暂时无法显示' })));
     return root;
@@ -11185,6 +11287,7 @@ function buildEntryAccordion(ctx) {
         if (entryOpenGroup === g.id) return;
         entryOpenGroup = g.id;
         const fresh = buildEntryAccordion(workspaceContext());
+        fresh.dataset.group = g.id;
         root.replaceWith(fresh);
         const btn = fresh.querySelector('.settings-nav-item.on');
         if (btn) btn.focus({ preventScroll: true });
