@@ -3,7 +3,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-src="$(ls -1 newest-version/Hiscore_v*.html | sort -V | tail -n 1)"
+src="$(ls -1 newest-version/Hiscore_v*.html | grep -E '/Hiscore_v[0-9]+(\.[0-9]+)*\.html$' | sort -V | tail -n 1)"
 mkdir -p docs
 cp "$src" docs/index.html
 : > docs/.nojekyll

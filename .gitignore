@@ -17,3 +17,13 @@ Thumbs.db
 # Local Qoder settings (do not push)
 .qoder/settings.local.json
 .qoder/worktrees/
+
+# Promo render artifacts (do not push)
+宣传视频/**/frames/
+宣传视频/**/checks/
+宣传视频/**/__pycache__/
+宣传视频/**/*.pyc
+宣传视频/**/render.log
+__pycache__/
+*.pyc
+未归档/素材/

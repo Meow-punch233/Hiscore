@@ -2,17 +2,13 @@
 
 校园成绩工作台：单文件 HTML，纯前端运行，数据留在本机浏览器。打开网页即可导入成绩、看班级 PK、生成学生分析与家长报告。
 
-当前版本：**v3.0**（2026-11-21）
+当前版本：**v3.5**（2026-11-27）
 
 ## 在线使用
 
-部署到 GitHub Pages 后，访问：
+在线页面：
 
-```text
-https://<你的 GitHub 用户名>.github.io/<仓库名>/
-```
-
-建议把上面这一行替换成你的真实地址，方便自己以后点开。
+[https://meow-punch233.github.io/Hiscore/](https://meow-punch233.github.io/Hiscore/)
 
 ## 功能
 
@@ -23,6 +19,9 @@ https://<你的 GitHub 用户名>.github.io/<仓库名>/
 - **小懂弟 & 大学姐**：接入 OpenAI 兼容接口的对话助手，首次发送前展示完整外发请求体，本次会话确认一次即可
 - **本机优先**：localStorage + IndexedDB，不上传成绩；API Key 只存本机，不写入导出备份
 - **手机可用**：响应式布局，手机浏览器也能查看与导出
+- **学科与评分**：高中 / 初中学段预设；每场考试保留当时的规则快照；缺考、未开科和真 0 分分开处理
+- **大学·试验**：学分、加权平均和 GPA（试验功能，目前是个人成绩单）
+- **字母等级与英文案例页**：字母绩点显示、打印排版，以及全英文案例演示页
 
 ## 部署到 GitHub Pages
 
@@ -53,7 +52,7 @@ docs/
 等 1–2 分钟，页面顶部会出现访问地址：
 
 ```text
-https://<用户名>.github.io/<仓库名>/
+https://meow-punch233.github.io/Hiscore/
 ```
 
 ### 4. 更新线上版本
@@ -82,6 +81,7 @@ bash scripts/sync-pages.sh
 ```text
 docs/index.html          GitHub Pages 线上页面（发布副本）
 newest-version/          最新稳定版源文件
+规划/                   历史方案与规划稿（第1、2版及 alpha 方案）
 迭代版本/                历史版本与迭代记录
 scripts/sync-pages.sh    把最新稳定版同步到 docs/
 CLAUDE.md                开发约定与数据安全约束
